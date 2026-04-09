@@ -7,3 +7,5 @@ data/dumps/
 data/parsed/
 *.db
 .pytest_cache/
+dumps/
+logging.log

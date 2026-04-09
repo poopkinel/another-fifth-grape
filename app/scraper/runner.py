@@ -19,6 +19,9 @@ logger = logging.getLogger(__name__)
 # Limit files per chain to keep scrape fast (full price + stores is enough)
 DEFAULT_FILE_LIMIT = 3
 
+# STORE_FILE is not in all_full_files(), so we combine manually
+SCRAPE_FILE_TYPES = ["PRICE_FULL_FILE", "STORE_FILE"]
+
 
 def run_scrape(chain_ids: list[str] | None = None, file_limit: int = DEFAULT_FILE_LIMIT):
     """Run full scrape→parse→load pipeline for specified chains (or all)."""
@@ -75,11 +78,15 @@ def _scrape_chain(scraper_name: str, dump_dir: str, file_limit: int):
     """Download XML files for one chain."""
     scraper = ScarpingTask(
         enabled_scrapers=[scraper_name],
-        files_types=FileTypesFilters.all_full_files(),
-        dump_folder_name=dump_dir,
+        files_types=SCRAPE_FILE_TYPES,
+        output_configuration={
+            "output_mode": "disk",
+            "base_storage_path": dump_dir,
+        },
         multiprocessing=1,
     )
-    scraper.start(limit=file_limit)
+    thread = scraper.start(limit=file_limit)
+    thread.join()
 
 
 def _parse_chain(scraper_name: str, dump_dir: str, parsed_dir: str):
@@ -87,7 +94,7 @@ def _parse_chain(scraper_name: str, dump_dir: str, parsed_dir: str):
     task = ConvertingTask(
         data_folder=dump_dir,
         enabled_parsers=[scraper_name],
-        files_types=FileTypesFilters.all_full_files(),
+        files_types=SCRAPE_FILE_TYPES,
         output_folder=parsed_dir,
     )
     task.start()

@@ -86,6 +86,12 @@ def init_db():
         product_cols = {r[1] for r in conn.execute("PRAGMA table_info(products)")}
         if "raw_name" not in product_cols:
             conn.execute("ALTER TABLE products ADD COLUMN raw_name TEXT")
+        if "canonical_product_id" not in product_cols:
+            conn.execute("ALTER TABLE products ADD COLUMN canonical_product_id TEXT")
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_products_canonical "
+            "ON products(canonical_product_id)"
+        )
 
         if "verified_by_places" not in existing_cols:
             conn.execute("ALTER TABLE stores ADD COLUMN verified_by_places TEXT")
@@ -208,6 +214,52 @@ def get_stores_by_keys(
         flat,
     ).fetchall()
     return [dict(r) for r in rows]
+
+
+def get_canonical_groups(
+    conn: sqlite3.Connection, product_ids: list[str]
+) -> dict[str, list[str]]:
+    """For each requested product_id, return the list of every product_id
+    that shares its canonical group (the requested id is always included).
+
+    A product_id whose canonical_product_id is NULL is its own group of one.
+    A requested id that doesn't exist in the products table maps to [itself].
+    """
+    if not product_ids:
+        return {}
+
+    placeholders = ",".join("?" * len(product_ids))
+    rows = conn.execute(
+        f"""SELECT product_id,
+                   COALESCE(canonical_product_id, product_id) AS canonical
+              FROM products
+             WHERE product_id IN ({placeholders})""",
+        product_ids,
+    ).fetchall()
+
+    requested_to_canonical = {pid: pid for pid in product_ids}
+    for r in rows:
+        requested_to_canonical[r["product_id"]] = r["canonical"]
+
+    canonicals = list(set(requested_to_canonical.values()))
+    canon_placeholders = ",".join("?" * len(canonicals))
+    expansion = conn.execute(
+        f"""SELECT product_id,
+                   COALESCE(canonical_product_id, product_id) AS canonical
+              FROM products
+             WHERE COALESCE(canonical_product_id, product_id)
+                   IN ({canon_placeholders})""",
+        canonicals,
+    ).fetchall()
+
+    members: dict[str, list[str]] = {}
+    for r in expansion:
+        members.setdefault(r["canonical"], []).append(r["product_id"])
+
+    return {
+        pid: members.get(canonical, [pid])
+        for pid, canonical in requested_to_canonical.items()
+    }
 
 
 def get_last_scrape_time(conn: sqlite3.Connection) -> str | None:

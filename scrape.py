@@ -20,8 +20,8 @@ def main():
     parser.add_argument(
         "--limit",
         type=int,
-        default=3,
-        help="Max files to download per chain (default: 3)",
+        default=None,
+        help="Max files to download per chain per file type (default: all)",
     )
     parser.add_argument(
         "--verbose", "-v",

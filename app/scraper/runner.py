@@ -17,7 +17,7 @@ from app.scraper.chains import CHAINS, scraper_name_to_chain_id
 logger = logging.getLogger(__name__)
 
 # Limit files per chain to keep scrape fast (full price + stores is enough)
-DEFAULT_FILE_LIMIT = 3
+DEFAULT_FILE_LIMIT = None  # None = download all available files
 
 # STORE_FILE is not in all_full_files(), so we combine manually
 SCRAPE_FILE_TYPES = ["PRICE_FULL_FILE", "STORE_FILE"]
@@ -75,18 +75,20 @@ def run_scrape(chain_ids: list[str] | None = None, file_limit: int = DEFAULT_FIL
 
 
 def _scrape_chain(scraper_name: str, dump_dir: str, file_limit: int):
-    """Download XML files for one chain."""
-    scraper = ScarpingTask(
-        enabled_scrapers=[scraper_name],
-        files_types=SCRAPE_FILE_TYPES,
-        output_configuration={
-            "output_mode": "disk",
-            "base_storage_path": dump_dir,
-        },
-        multiprocessing=1,
-    )
-    thread = scraper.start(limit=file_limit)
-    thread.join()
+    """Download XML files for one chain. Scrape stores and prices separately
+    to ensure both file types are downloaded (combined requests may skip one)."""
+    for file_type in SCRAPE_FILE_TYPES:
+        scraper = ScarpingTask(
+            enabled_scrapers=[scraper_name],
+            files_types=[file_type],
+            output_configuration={
+                "output_mode": "disk",
+                "base_storage_path": dump_dir,
+            },
+            multiprocessing=1,
+        )
+        thread = scraper.start(limit=file_limit)
+        thread.join()
 
 
 def _parse_chain(scraper_name: str, dump_dir: str, parsed_dir: str):
@@ -131,9 +133,14 @@ def _load_stores(chain_id: str, parsed_dir: str):
             # Normalize column names to lowercase
             df.columns = [c.strip().lower() for c in df.columns]
 
+            # Forward-fill root-level fields the parser only sets on the first row
+            root_cols = [c for c in ("chainid", "chainname", "subchainid", "subchainname") if c in df.columns]
+            if root_cols:
+                df[root_cols] = df[root_cols].ffill()
+
             for _, row in df.iterrows():
                 store_id = str(row.get("storeid", "")).strip()
-                if not store_id:
+                if not store_id or store_id == "nan":
                     continue
 
                 upsert_store(conn, {
@@ -141,9 +148,9 @@ def _load_stores(chain_id: str, parsed_dir: str):
                     "chain_id": chain_id,
                     "chain_name": display_name,
                     "branch_name": str(row.get("storename", "")).strip(),
-                    "address": str(row.get("address", "")).strip(),
-                    "city": str(row.get("city", "")).strip(),
-                    "lat": None,  # Not in source data; can be geocoded later
+                    "address": _clean_address(row.get("address")),
+                    "city": _clean_city(row.get("city")),
+                    "lat": None,  # Filled by geocode.py
                     "lng": None,
                 })
 
@@ -172,22 +179,31 @@ def _load_prices(chain_id: str, parsed_dir: str):
 
             df.columns = [c.strip().lower() for c in df.columns]
 
+            # Parser only sets root-level fields (chainid, storeid, etc.)
+            # on the first row per file — forward-fill them across all items
+            root_cols = [c for c in ("chainid", "subchainid", "storeid", "bikoretno", "itemstatus") if c in df.columns]
+            if root_cols:
+                df[root_cols] = df[root_cols].ffill()
+
             for _, row in df.iterrows():
                 item_code = str(row.get("itemcode", "")).strip()
                 store_id = str(row.get("storeid", "")).strip()
-                if not item_code or not store_id:
+                store_id = store_id.lstrip("0") or "0"  # Match store CSV format (no leading zeros)
+                if not item_code or not store_id or item_code == "nan" or store_id == "nan":
                     continue
 
-                # Price parsing — handle commas, empty strings
-                raw_price = str(row.get("itemprice", "0")).strip().replace(",", "")
+                # Price parsing — handle commas, empty strings, NaN
+                raw_price = str(row.get("itemprice", "")).strip().replace(",", "")
+                if not raw_price or raw_price == "nan":
+                    continue
                 try:
                     price_val = float(raw_price)
                 except ValueError:
                     continue
 
-                # Item status: 0 = active/in-stock in most chains
-                item_status = str(row.get("itemstatus", "0")).strip()
-                in_stock = item_status in ("0", "1", "")  # Conservative: default to in-stock
+                # ItemStatus per gov spec: 0 = removed from sale, 1 = active
+                item_status = str(row.get("itemstatus", "1")).strip()
+                in_stock = item_status != "0"
 
                 # Upsert product
                 barcode = item_code if len(item_code) >= 8 else None
@@ -213,10 +229,23 @@ def _load_prices(chain_id: str, parsed_dir: str):
 
 
 def _nullable(val) -> str | None:
-    """Return None for NaN/empty values."""
+    """Return None for NaN/empty/sentinel values."""
     if val is None:
         return None
     s = str(val).strip()
-    if s in ("", "nan", "None"):
+    if s in ("", "nan", "None", "{}"):
         return None
+    return s
+
+
+def _clean_address(val) -> str:
+    return _nullable(val) or ""
+
+
+def _clean_city(val) -> str:
+    s = _nullable(val)
+    if s is None:
+        return ""
+    if s.isdigit():
+        return ""
     return s

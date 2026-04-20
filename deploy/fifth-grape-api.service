@@ -1,0 +1,16 @@
+[Unit]
+Description=Fifth Grape FastAPI server (uvicorn)
+After=network.target
+
+[Service]
+Type=simple
+User=fifth-grape
+WorkingDirectory=/home/fifth-grape/backend
+Environment="PATH=/home/fifth-grape/backend/.venv/bin"
+EnvironmentFile=/home/fifth-grape/backend/.env
+ExecStart=/home/fifth-grape/backend/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

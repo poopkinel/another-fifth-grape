@@ -6,6 +6,9 @@ __pycache__/
 data/dumps/
 data/parsed/
 *.db
+*.db.bak.*
 .pytest_cache/
 dumps/
-logging.log
+*.log
+*cookies*
+.claude/

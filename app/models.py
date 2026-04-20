@@ -12,6 +12,7 @@ class Store(BaseModel):
     city: str
     lat: float | None
     lng: float | None
+    geocodeStatus: str | None  # None = not yet attempted; 'ok' = lat/lng present; 'no_results' = tried, no match
 
 
 class Product(BaseModel):
@@ -32,7 +33,11 @@ class Price(BaseModel):
     updatedAt: str
 
 
-class SnapshotResponse(BaseModel):
+class PriceLookupRequest(BaseModel):
+    productIds: list[str]
+
+
+class PriceLookupResponse(BaseModel):
     stores: list[Store]
     products: list[Product]
     prices: list[Price]

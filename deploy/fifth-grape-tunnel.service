@@ -1,0 +1,14 @@
+[Unit]
+Description=Fifth Grape Cloudflare Tunnel
+After=network.target fifth-grape-api.service
+Requires=fifth-grape-api.service
+
+[Service]
+Type=simple
+User=fifth-grape
+ExecStart=/usr/local/bin/cloudflared tunnel --config /home/fifth-grape/.cloudflared/fifth-grape.yml run fifth-grape
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

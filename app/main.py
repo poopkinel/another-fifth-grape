@@ -1,5 +1,6 @@
 """FastAPI application for Fifth Grape backend."""
 
+import os
 from datetime import datetime, timezone
 
 from fastapi import FastAPI, Query
@@ -13,8 +14,11 @@ from app.db import (
     get_products_by_ids,
     get_stores_by_keys,
     get_last_scrape_time,
+    get_canonical_groups,
 )
 from app.models import PriceLookupRequest, PriceLookupResponse, Store, Product, Price
+
+EXPAND_CANONICAL = os.environ.get("EXPAND_CANONICAL", "true").lower() in ("true", "1", "yes")
 
 app = FastAPI(title="Fifth Grape API", version="0.1.0")
 
@@ -69,7 +73,43 @@ def lookup_prices(req: PriceLookupRequest):
     requested_ids = list(dict.fromkeys(req.productIds))
 
     with get_conn() as conn:
-        raw_prices = get_prices_for_products(conn, requested_ids)
+        if EXPAND_CANONICAL:
+            groups = get_canonical_groups(conn, requested_ids)
+        else:
+            groups = {pid: [pid] for pid in requested_ids}
+
+        all_lookup_ids = list({m for members in groups.values() for m in members})
+        raw_prices_underlying = (
+            get_prices_for_products(conn, all_lookup_ids) if all_lookup_ids else []
+        )
+
+        # underlying product_id → which requested id(s) it serves
+        underlying_to_requested: dict[str, list[str]] = {}
+        for req_id, members in groups.items():
+            for m in members:
+                underlying_to_requested.setdefault(m, []).append(req_id)
+
+        # Dedupe by (store, chain, requested_id): prefer in_stock, then lowest price.
+        best: dict[tuple[str, str, str], dict] = {}
+        for price in raw_prices_underlying:
+            for req_id in underlying_to_requested.get(price["product_id"], []):
+                key = (price["store_id"], price["chain_id"], req_id)
+                cur = best.get(key)
+                if cur is None:
+                    best[key] = price
+                    continue
+                cur_in, new_in = bool(cur["in_stock"]), bool(price["in_stock"])
+                if new_in and not cur_in:
+                    best[key] = price
+                elif new_in == cur_in and price["price"] < cur["price"]:
+                    best[key] = price
+
+        raw_prices = []
+        for (_s, _c, req_id), price in best.items():
+            relabelled = dict(price)
+            relabelled["product_id"] = req_id
+            raw_prices.append(relabelled)
+
         matched_product_ids = list({p["product_id"] for p in raw_prices})
         raw_products = get_products_by_ids(conn, matched_product_ids)
         store_keys = list({(p["store_id"], p["chain_id"]) for p in raw_prices})

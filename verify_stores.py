@@ -12,9 +12,20 @@ Logic:
      but this chain isn't among them, 'unknown' otherwise.
 
 Usage:
-    python verify_stores.py                 # full run
-    python verify_stores.py --limit 20      # smoke test
-    python verify_stores.py --dry-run       # query without writing
+    python verify_stores.py                   # never-checked clusters (original)
+    python verify_stores.py --limit 20        # smoke test
+    python verify_stores.py --dry-run         # query without writing
+    python verify_stores.py --retry-unknown   # re-verify clusters that have any
+                                              # rows currently marked 'unknown'
+                                              # (e.g. previously failed because
+                                              #  city was empty — now backfilled).
+                                              # Overwrites ONLY unknown rows;
+                                              # leaves 'verified' and
+                                              # 'not_at_address' untouched.
+
+On a --retry-unknown pass, clusters whose cities were just inferred today are
+processed first (they're the likeliest to flip, since their previous failure
+was the empty-city bug).
 """
 
 import argparse
@@ -36,7 +47,7 @@ logger = logging.getLogger("verify_stores")
 PLACES_TEXT_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json"
 PLACES_NEARBY_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
 QPS_DELAY = 0.1  # Places allows much higher QPS than Geocoding
-NEARBY_RADIUS_M = 100
+DEFAULT_NEARBY_RADIUS_M = 100
 
 # Normalize common variants in Israeli city names before querying Places.
 CITY_NORMALIZATIONS: dict[str, str] = {
@@ -170,6 +181,22 @@ def main():
     parser = argparse.ArgumentParser(description="Verify stores via Google Places")
     parser.add_argument("--limit", type=int, default=None, help="Max clusters to query")
     parser.add_argument("--dry-run", action="store_true", help="Query without writing")
+    parser.add_argument(
+        "--retry-unknown", action="store_true",
+        help="Re-verify clusters that contain any 'unknown' rows. Overwrites "
+             "only the 'unknown' rows; keeps 'verified' and 'not_at_address' "
+             "decisions intact. City-inferred-today clusters go first.",
+    )
+    parser.add_argument(
+        "--only-all-unknown", action="store_true",
+        help="Narrow --retry-unknown to clusters where EVERY row is unknown "
+             "(skip partially-resolved clusters). Use with --nearby-radius to "
+             "give Places a wider net on the hard cases.",
+    )
+    parser.add_argument(
+        "--nearby-radius", type=int, default=DEFAULT_NEARBY_RADIUS_M,
+        help=f"Radius in metres for Places Nearby Search (default {DEFAULT_NEARBY_RADIUS_M})",
+    )
     parser.add_argument("--verbose", "-v", action="store_true")
     args = parser.parse_args()
 
@@ -184,9 +211,33 @@ def main():
 
     init_db()
 
-    # Find all duplicate-address clusters that haven't been checked yet.
-    # "Checked" = any store in the cluster has verified_by_places IS NOT NULL.
-    with get_conn() as conn:
+    # Find duplicate-address clusters to verify.
+    #   default mode    — clusters never checked (all rows have verified_by_places IS NULL).
+    #   --retry-unknown — clusters where at least one row is currently 'unknown'.
+    #                     We re-query because many of these failed the first time
+    #                     with empty city, which today's backfill fixed. Order
+    #                     city-inferred-today clusters first so the most-likely-
+    #                     to-flip work gets done even under --limit.
+    if args.retry_unknown:
+        # --only-all-unknown narrows to clusters where every row is unknown.
+        # These are the hardest cases (Places found nothing on the previous
+        # pass) and usually worth pairing with a wider --nearby-radius.
+        unknown_cond = (
+            "SUM(CASE WHEN verified_by_places = 'unknown' THEN 1 ELSE 0 END) = COUNT(*)"
+            if args.only_all_unknown else
+            "SUM(CASE WHEN verified_by_places = 'unknown' THEN 1 ELSE 0 END) > 0"
+        )
+        clusters_sql = f"""
+            SELECT address, city,
+                   MAX(CASE WHEN city_inferred_at IS NOT NULL THEN 1 ELSE 0 END) AS city_new
+            FROM stores
+            WHERE address != ''
+            GROUP BY address, city
+            HAVING COUNT(*) > 1
+               AND {unknown_cond}
+            ORDER BY city_new DESC, address, city
+        """
+    else:
         clusters_sql = """
             SELECT address, city
             FROM stores
@@ -196,6 +247,7 @@ def main():
                AND SUM(CASE WHEN verified_by_places IS NOT NULL THEN 1 ELSE 0 END) = 0
             ORDER BY address, city
         """
+    with get_conn() as conn:
         if args.limit:
             clusters_sql += f" LIMIT {int(args.limit)}"
         clusters = conn.execute(clusters_sql).fetchall()
@@ -214,10 +266,13 @@ def main():
         norm_city = normalize_city(city)
         text_query = f"{address}, {norm_city}, Israel" if norm_city else f"{address}, Israel"
 
-        # Fetch all stores in this cluster once; we also need lat/lng for Nearby Search
+        # Fetch all stores in this cluster once; we also need lat/lng for Nearby Search.
+        # In retry-unknown mode we still want ALL rows in the cluster (even verified
+        # ones), because the Places result applies cluster-wide — but we'll filter
+        # updates so we only touch rows currently 'unknown'.
         with get_conn() as conn:
             stores = conn.execute(
-                "SELECT chain_id, store_id, lat, lng FROM stores "
+                "SELECT chain_id, store_id, lat, lng, verified_by_places FROM stores "
                 "WHERE address = ? AND city = ?",
                 (address, city),
             ).fetchall()
@@ -249,7 +304,7 @@ def main():
         if lat is not None and lng is not None:
             time.sleep(QPS_DELAY)
             try:
-                nearby_results = query_nearby(session, api_key, lat, lng, NEARBY_RADIUS_M)
+                nearby_results = query_nearby(session, api_key, lat, lng, args.nearby_radius)
             except requests.RequestException as e:
                 logger.warning("Nearby Search error at (%s,%s): %s", lat, lng, e)
                 nearby_results = []
@@ -268,10 +323,14 @@ def main():
         if not had_any_result:
             # Neither Google method returned anything — mark 'unknown'.
             for s in stores:
+                if args.retry_unknown and s["verified_by_places"] != "unknown":
+                    continue  # keep existing verified / not_at_address decisions
                 updates.append(("unknown", None, s["chain_id"], s["store_id"]))
                 n_unknown += 1
         else:
             for s in stores:
+                if args.retry_unknown and s["verified_by_places"] != "unknown":
+                    continue  # keep existing verified / not_at_address decisions
                 if s["chain_id"] in chains_at_address:
                     updates.append(("verified", name_by_chain[s["chain_id"]],
                                     s["chain_id"], s["store_id"]))
@@ -288,7 +347,7 @@ def main():
                     "WHERE chain_id = ? AND store_id = ?",
                     updates,
                 )
-        elif args.verbose:
+        if args.verbose or args.dry_run:
             for status, name, chain_id, store_id in updates:
                 logger.info("  [%s] %s/%s → %s", status, chain_id, store_id, name)
 

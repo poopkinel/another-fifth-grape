@@ -97,6 +97,14 @@ def init_db():
             conn.execute("ALTER TABLE stores ADD COLUMN verified_by_places TEXT")
         if "places_name" not in existing_cols:
             conn.execute("ALTER TABLE stores ADD COLUMN places_name TEXT")
+        # Forensic markers for the 2026-04-21 empty-city backfill + re-geocode.
+        # Nullable everywhere; set only when inference / region-biased refetch
+        # actually touched the row. Lets future debugging ask "did our inference
+        # put this here?" without guessing.
+        if "city_inferred_at" not in existing_cols:
+            conn.execute("ALTER TABLE stores ADD COLUMN city_inferred_at TEXT")
+        if "coords_refetched_at" not in existing_cols:
+            conn.execute("ALTER TABLE stores ADD COLUMN coords_refetched_at TEXT")
 
 
 # ── Write operations (used by scraper) ──────────────────────────────

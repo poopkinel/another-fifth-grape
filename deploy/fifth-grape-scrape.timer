@@ -1,0 +1,10 @@
+[Unit]
+Description=Run fifth-grape-scrape daily (off-peak)
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+Persistent=true
+RandomizedDelaySec=30min
+
+[Install]
+WantedBy=timers.target

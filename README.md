@@ -59,10 +59,16 @@ enrich.py             CLI: assign emojis, extract brands from names, clean names
 enrich_off.py         CLI: enrich products from Open Food Facts by barcode
 scripts/
   backfill_canonical.py   One-shot equivalence-grouping backfill (HIGH-tier only)
+  prune_events.py         Analytics-events retention pruner
+  verify_source.py        Direct-source verification — fetch + parse raw chain XMLs
+  infer_city.py           Backfill empty city values from branch names
+  fetch_hours.py          Backfill opening_hours from Google Places
 deploy/
-  vps-setup.sh            One-shot Hetzner/Ubuntu VPS bootstrap
-  fifth-grape-api.service systemd unit for uvicorn
-  fifth-grape-tunnel.service  systemd unit for the Cloudflare tunnel
+  vps-setup.sh                              One-shot Hetzner/Ubuntu VPS bootstrap
+  fifth-grape-api.service                   systemd unit for uvicorn
+  fifth-grape-tunnel.service                systemd unit for the Cloudflare tunnel
+  fifth-grape-scrape.{service,timer}        Daily scrape (03:00 + jitter)
+  fifth-grape-prune-events.{service,timer}  Daily analytics-events retention prune
 data/
   fifth_grape.db          SQLite database (gitignored)
 requirements.txt
@@ -77,10 +83,18 @@ requirements.txt
 
 `scrape.py` drives [`app/scraper/runner.py`](app/scraper/runner.py) to:
 
-- Download `PriceFull` and `StoresFull` XML feeds for each chain via [`il-supermarket-scraper`](https://pypi.org/project/il-supermarket-scraper/).
+- Download `PriceFull`, `StoresFull`, and `PromoFull` XML feeds for each chain via [`il-supermarket-scraper`](https://pypi.org/project/il-supermarket-scraper/).
 - Parse them to CSVs with [`il-supermarket-parser`](https://pypi.org/project/il-supermarket-parser/).
-- Upsert into `stores`, `products`, and `prices`.
+- Upsert into `stores`, `products`, `prices`, `promotions`, and `promotion_items`.
 - Record each run in `scrape_runs` for audit / debugging.
+
+The data the chains publish is the same gov.il-mandated transparency data described at https://www.gov.il/he/pages/cpfta_prices_regulations — the page is the regulation, not a separate source. Quality issues observed in those feeds are tracked in [`data_source_issues.md`](data_source_issues.md) (complaint-grade evidence). The companion CLI `scripts/verify_source.py` fetches a chain's raw `.gz` files directly and reports against each tracker issue:
+
+```bash
+python scripts/verify_source.py STORES_URL PRICE_URL --expected-chain-id 7290027600007 --out /tmp/evidence
+```
+
+Most chain portals are geo-blocked outside Israel — run from a local Israeli IP for anything other than Shufersal.
 
 ```bash
 python scrape.py                              # all chains
@@ -295,3 +309,16 @@ journalctl -u fifth-grape-api -n 30 --no-pager
 ```
 
 Schema migrations run automatically on start via `init_db()`.
+
+**Scheduled scrape:**
+
+`deploy/fifth-grape-scrape.{service,timer}` runs `scrape.py` daily at 03:00 (with up to 30 min jitter) under the `fifth-grape` user. Install once on the VPS:
+
+```bash
+sudo cp deploy/fifth-grape-scrape.service deploy/fifth-grape-scrape.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now fifth-grape-scrape.timer
+systemctl list-timers fifth-grape-scrape.timer
+```
+
+Inspect a run with `journalctl -u fifth-grape-scrape -n 200 --no-pager`. The unit's `Type=oneshot` with `TimeoutStartSec=4h`; trigger ad-hoc with `sudo systemctl start fifth-grape-scrape.service`.

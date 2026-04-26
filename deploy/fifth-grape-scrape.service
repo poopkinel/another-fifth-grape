@@ -1,0 +1,15 @@
+[Unit]
+Description=Fifth Grape — scrape supermarket chain XML feeds (PriceFull / StoresFull)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=fifth-grape
+WorkingDirectory=/home/fifth-grape/backend
+EnvironmentFile=/home/fifth-grape/backend/.env
+ExecStart=/home/fifth-grape/backend/.venv/bin/python scrape.py
+TimeoutStartSec=4h
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=5

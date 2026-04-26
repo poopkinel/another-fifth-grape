@@ -61,29 +61,58 @@ def gunzip_if_needed(data: bytes, hint_name: str) -> bytes:
     return data
 
 
+def _local_tag(elem) -> str:
+    """Tag without XML namespace, lowercased — for case-insensitive matching.
+    Different chains' XMLs use inconsistent casing (e.g. <ChainId> vs <ChainID>
+    vs <CHAINID>); spec doesn't pin it down."""
+    tag = elem.tag
+    if isinstance(tag, str) and "}" in tag:
+        tag = tag.split("}", 1)[1]
+    return tag.lower() if isinstance(tag, str) else ""
+
+
 def text_or_empty(elem, tag: str) -> str:
+    """Direct child whose local-name matches `tag` case-insensitively → its text or ''."""
     if elem is None:
         return ""
-    child = elem.find(tag)
-    if child is None or child.text is None:
-        return ""
-    return child.text.strip()
+    target = tag.lower()
+    for child in elem:
+        if _local_tag(child) == target:
+            return (child.text or "").strip()
+    return ""
+
+
+def iter_ci(tree, tag: str):
+    """Yield elements anywhere in `tree` whose local-name matches `tag` case-insensitively."""
+    target = tag.lower()
+    for elem in tree.iter():
+        if _local_tag(elem) == target:
+            yield elem
+
+
+def first_text_anywhere(tree, tag: str) -> str:
+    """First case-insensitive match of `tag` anywhere in tree, returning text or ''."""
+    for elem in iter_ci(tree, tag):
+        if elem.text:
+            return elem.text.strip()
+    return ""
 
 
 def inspect_stores_xml(xml_bytes: bytes) -> dict:
-    """Issue #1, #2, #3 checks against StoresFull XML."""
+    """Issue #1, #2, #3 checks against StoresFull XML. Tag matching is
+    case-insensitive throughout — chains differ on casing of root IDs."""
     tree = ET.fromstring(xml_bytes)
 
-    chain_id = text_or_empty(tree, ".//ChainId") or text_or_empty(tree, "ChainId")
-    chain_name = text_or_empty(tree, ".//ChainName") or text_or_empty(tree, "ChainName")
+    chain_id = first_text_anywhere(tree, "ChainId")
+    chain_name = first_text_anywhere(tree, "ChainName")
 
     sub_chains_seen: Counter = Counter()
-    for sc in tree.iter("SubChain"):
+    for sc in iter_ci(tree, "SubChain"):
         sid = text_or_empty(sc, "SubChainId")
         snm = text_or_empty(sc, "SubChainName")
         sub_chains_seen[(sid, snm)] += 1
 
-    stores = list(tree.iter("Store"))
+    stores = list(iter_ci(tree, "Store"))
     n_stores = len(stores)
     n_empty_addr = sum(1 for s in stores if not text_or_empty(s, "Address"))
     n_empty_city = sum(1 for s in stores if not text_or_empty(s, "City"))
@@ -118,17 +147,15 @@ def inspect_stores_xml(xml_bytes: bytes) -> dict:
 
 
 def inspect_pricefull_xml(xml_bytes: bytes, item_limit: int = 200_000) -> dict:
-    """Issue #6 (empty <ItemName>) check against PriceFull XML."""
+    """Issue #6 (empty <ItemName>) check against PriceFull XML. Case-insensitive."""
     tree = ET.fromstring(xml_bytes)
-    chain_id = text_or_empty(tree, ".//ChainId") or text_or_empty(tree, "ChainId")
-    sub_chain_id = (
-        text_or_empty(tree, ".//SubChainId") or text_or_empty(tree, "SubChainId")
-    )
+    chain_id = first_text_anywhere(tree, "ChainId")
+    sub_chain_id = first_text_anywhere(tree, "SubChainId")
 
     n_items = 0
     n_empty_name = 0
     sample_empty: list[str] = []
-    for it in tree.iter("Item"):
+    for it in iter_ci(tree, "Item"):
         n_items += 1
         if not text_or_empty(it, "ItemName"):
             n_empty_name += 1

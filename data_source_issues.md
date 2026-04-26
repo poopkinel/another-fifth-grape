@@ -11,6 +11,7 @@ Tracker for data-quality problems originating in the supermarket chains' publish
 **Changelog.**
 - 2026-04-26 — Initial tracker. Issues #5 and #6 retracted same day on re-verification: #5 had no actual sentinel `branch_name` rows; #6 was our Pandas parser, not source.
 - 2026-04-26 — Issue #1 strengthened with library-source evidence (see §1).
+- 2026-04-26 — Direct-source verifications run against Shufersal, Yeinot Bitan/Carrefour, and Hazi Hinam (see §Verifications log). All three confirmed clean for `<ItemName>`; combined with our DB still showing 1,126 `nan` product names, the original §6 retraction is reinforced — the bug is in `il-supermarket-parser` or downstream, not source-side.
 
 **Verification methods available without re-scraping.**
 
@@ -142,6 +143,21 @@ To turn this from suspicion into evidence, we'd need to manually walk a sample o
 Append a new numbered section. Keep the per-issue structure: *what's wrong (source side)*, *evidence* (queries + file refs + commits with dates), *honest separation of source vs. our pipeline*, *why it matters for the complaint*. Update the summary table.
 
 When citing query counts, include the date the query was run — these counts move as the chains republish and as we backfill.
+
+## Verifications log
+
+Direct-source verifications against chain portals, recorded as we run them. Each row references which issues are addressed. Run via `scripts/verify_source.py` or by hand-fetching `.gz` files. *Source-clean* means **0** items with empty `<ItemName>` and the structural fields (ChainId, addresses) populated.
+
+| Date | Chain | File | Result | Notes |
+|------|-------|------|--------|-------|
+| 2026-04-26 | Shufersal | live PriceFull (store 001) | **source-clean**: 4,434 items, 0 empty `<ItemName>` | First verification. Also tested 5 of our `nan` product_ids: 3 found in this PriceFull, all with real Hebrew names. |
+| 2026-04-26 | Shufersal | controlled scrape (limit=2, temp DB) | **pipeline-clean for Shufersal-only**: 4,151 products in temp DB, 1 with `name='nan'` (0.024%) | Lone stray was barcode `7290119380053` (has unit `100 מ"ל` but no name in source — single-row source gap, not a pattern). |
+| 2026-04-26 | Yeinot Bitan / Carrefour | local PriceFull (operator-fetched) | **source-clean**: 2,038 items, 0 empty `<ItemName>` | Two of our 5 Set-B `nan` barcodes found, both with names. Issue #1 (Carrefour-under-Yeinot-Bitan ChainId reuse) corroborated separately. |
+| 2026-04-26 | Hazi Hinam | local StoresFull + PriceFull (operator-fetched) | **source-clean**: 7,971 items, 0 empty `<ItemName>`; 13 stores, 0 empty Address, 1 empty City (7.69%) | Hazi Hinam ships names. The 103 `nan` products in our DB whose last writer must be hazi_hinam (because they're in hazi_hinam but not mahsani_hashuk, and hazi_hinam is the 8th of 9 in our scrape order) cannot be explained by source-side empty cells. Confirms the bug is in `il-supermarket-parser` or our handling of its output for Hazi Hinam's specific XML. |
+
+**Implication for Issue #6.** Three of our nine chains (Shufersal, Yeinot Bitan, Hazi Hinam) are now confirmed to ship product names cleanly at source. Yet our production DB has 1,126 product rows with `name='nan'`, all touched by either hazi_hinam (1,126) or mahsani_hashuk (1,023) — and 103 are in hazi_hinam alone. Since hazi_hinam's source is clean, those 103 are **lost in our pipeline** between gunzip and DB write. The `il-supermarket-parser` library (or its hazi_hinam-specific sub-class) is the prime suspect; chain-specific because Shufersal's pipeline (also MultiPageWeb engine) is clean. Worth localizing before treating Issue #6 as anything other than retracted.
+
+**Outstanding source verifications (next session):** Mahsani Ashuk (the only remaining "last-writer" suspect for the other 1,023 `nan` rows); a Cerberus chain (Rami Levy / Yohananof / Osher Ad / Tiv Taam) for parity across engines. Mahsani's portal: `https://laibcatalog.co.il/`. Cerberus chains need FTP-style auth so they're harder.
 
 ## How to verify against the raw source
 

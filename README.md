@@ -61,6 +61,7 @@ scripts/
   backfill_canonical.py   One-shot equivalence-grouping backfill (HIGH-tier only)
   prune_events.py         Analytics-events retention pruner
   verify_source.py        Direct-source verification — fetch + parse raw chain XMLs
+  build_evidence.py       Build a complaint-grade evidence bundle (hashes + per-issue findings)
   infer_city.py           Backfill empty city values from branch names
   fetch_hours.py          Backfill opening_hours from Google Places
 deploy/

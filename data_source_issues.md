@@ -12,6 +12,7 @@ Tracker for data-quality problems originating in the supermarket chains' publish
 - 2026-04-26 — Initial tracker. Issues #5 and #6 retracted same day on re-verification: #5 had no actual sentinel `branch_name` rows; #6 was our Pandas parser, not source.
 - 2026-04-26 — Issue #1 strengthened with library-source evidence (see §1).
 - 2026-04-26 — Direct-source verifications run against Shufersal, Yeinot Bitan/Carrefour, and Hazi Hinam (see §Verifications log). All three confirmed clean for `<ItemName>`; combined with our DB still showing 1,126 `nan` product names, the original §6 retraction is reinforced — the bug is in `il-supermarket-parser` or downstream, not source-side.
+- 2026-04-26 — Two new high-severity findings from operator-fetched verification: §8 (Victory's StoresFull is **malformed XML**, truncated mid-document, no standard parser can read it) and §9 (Mahsani Hashuk publishes a placeholder store record with **all metadata fields empty** *and* uses a non-standard PriceFull schema — `<Prices>` root, `<Products>/<Product>` instead of `<Items>/<Item>`).
 
 **Verification methods available without re-scraping.**
 
@@ -32,6 +33,8 @@ Tracker for data-quality problems originating in the supermarket chains' publish
 | 5 | ~~Test/sentinel values in `branch_name`~~ | — | **Withdrawn** — see §5 | 0 |
 | 6 | ~~Barcoded products with no product name in feed~~ | — | **Withdrawn** — see §6 | 0 source-side; 1,126 our parser |
 | 7 | High Places "not-at-address" failure rate, smaller chains | Medium-Low | *Suspected* — needs disambiguation from Places coverage gaps | See per-chain table in §7 |
+| 8 | Victory's published StoresFull is malformed XML (truncated, no closing tags) | **Top-tier** | **Confirmed** | The whole file — no standard parser can read it |
+| 9 | Mahsani Hashuk: empty-everywhere store record + non-standard PriceFull schema | High | **Confirmed** | 1 placeholder store record observed; schema deviation affects every consumer of the feed |
 
 ---
 
@@ -138,6 +141,48 @@ To turn this from suspicion into evidence, we'd need to manually walk a sample o
 
 ---
 
+## 8. Victory's published StoresFull is malformed XML
+
+**What's wrong (source side).** Victory (chain_id `7290696200003`, served from `laibcatalog.co.il`) publishes a StoresFull file that is **not valid XML**. The file ends abruptly at line 646, immediately after a `</Store>` close tag, with no closing tags for any of the parent containers (`</Stores>`, `</SubChain>`, `</SubChains>`, and the root). Standard XML parsers reject the file outright; `xml.etree.ElementTree` raises `ParseError` on the unclosed elements.
+
+**Evidence.**
+- Operator-fetched on 2026-04-26 from the Mahsani / Victory portal at `https://laibcatalog.co.il/`. File `PriceFull7290696200003-...gz` (StoresFull category).
+- Direct-source verification run (`scripts/verify_source.py`) crashed during `ET.fromstring(...)` with the parse error pointing at the truncation. Heuristic regex over the raw text counts `<Store>` openings consistent with hundreds of records, none of which can be reached programmatically because the parent containers never close.
+- This is **not transfer corruption** — re-fetching produced the same byte sequence; the file is published in this state.
+
+**Why it matters for the complaint.** The CPFTA regulation requires retailers to *publish* machine-readable price and store data. A file that cannot be parsed by any standard XML implementation is, in any practical sense, not published. Every consumer of the feed — price-comparison sites, regulators auditing compliance, our app — has to either custom-write a recovery parser or treat Victory's data as missing. Most will do the latter, which means consumers cannot see Victory prices through any standards-compliant tool. This is a direct violation of the publication requirement, more severe than empty fields.
+
+**Distinguishing source vs. ours.** No ambiguity here. Our pipeline doesn't construct, transform, or rewrite the StoresFull XML; we download the chain-published `.gz` and gunzip it. The malformedness is byte-for-byte what Victory ships.
+
+**Action items.** None on our side — we should *not* "fix" this by writing a recovery parser. Treating malformed publication as if it were valid would obscure a finding worth raising to the regulator. Tracker note that the script will continue to fail on this file is the correct behavior.
+
+---
+
+## 9. Mahsani Hashuk: empty placeholder store + non-standard PriceFull schema
+
+Two issues at the same chain, found in the same operator-fetched verification on 2026-04-26.
+
+**What's wrong (source side, A — placeholder store record).** Mahsani Hashuk's StoresFull (chain_id `7290661400001`, served from `laibcatalog.co.il`) contains 1 store record with **every consumer-facing metadata field empty**: StoreId, StoreName, Address, City all blank. This isn't an empty `Address` (issue §3) or an empty `City` (issue §2) — it's an entire row that's a placeholder. There is no way to identify or locate this store; the record provides nothing.
+
+**What's wrong (source side, B — schema deviation).** Mahsani Hashuk's PriceFull does not follow the same schema other chains use:
+- Root element is `<Prices>`, not `<Root>` / `<Envelope>` / similar.
+- Items are wrapped in `<Products>` containing `<Product>` elements, not the much more common `<Items>` containing `<Item>` elements.
+- Element names use mixed casing including `<ChainID>` (uppercase `D`).
+
+**Evidence.**
+- Direct-source verification run (`scripts/verify_source.py`) on 2026-04-26 reported StoresFull with `stores_total: 1` of all-empty fields. Re-running with the all-fields-empty count is straightforward (the script could be extended to surface this explicitly; see Verifications log).
+- PriceFull verification reported `items_inspected: 0` — the script iterates `<Item>` elements and finds none because Mahsani uses `<Product>`. The 68 KB / ~7,000 line file is full of products under the alternate tag name (heuristic regex confirms presence). The `0` is therefore a *schema-deviation finding*, not a parser limitation we should silently work around.
+
+**Why it matters for the complaint.** Two distinct violations:
+1. Publishing rows with all metadata fields blank defeats the regulation's purpose of letting consumers identify and locate stores.
+2. Schema deviation forces every consumer of Mahsani's feed to either bespoke-code for their format or fail. The CPFTA regime presupposes that the feeds are machine-readable in a uniform way; even though most non-Mahsani chains converge on a common schema by convention, *no* shared schema is enforced by the regulation. Mahsani's deviation is consistent with that legal latitude — but it's also exactly the gap the regulator should close.
+
+**Distinguishing source vs. ours.** We download the chain-published file as-is. The empty-everywhere row and the schema deviation are both literally in the bytes Mahsani ships.
+
+**Action items.** None on our side. The schema deviation is interesting but should not be papered over by extending our verifier to absorb it — that would normalize the violation and erase the finding. Mahsani's PriceFull `<ItemName>` empty rate is therefore unmeasured by our standard tooling; if we want that number for the complaint, the cleanest path is a one-shot grep over the raw file (`grep -cE '<ItemName(\\s/?>|>\\s*</ItemName>)' file.xml`), recorded as ad-hoc evidence rather than baked into the verifier.
+
+---
+
 ## How to add new issues
 
 Append a new numbered section. Keep the per-issue structure: *what's wrong (source side)*, *evidence* (queries + file refs + commits with dates), *honest separation of source vs. our pipeline*, *why it matters for the complaint*. Update the summary table.
@@ -154,10 +199,12 @@ Direct-source verifications against chain portals, recorded as we run them. Each
 | 2026-04-26 | Shufersal | controlled scrape (limit=2, temp DB) | **pipeline-clean for Shufersal-only**: 4,151 products in temp DB, 1 with `name='nan'` (0.024%) | Lone stray was barcode `7290119380053` (has unit `100 מ"ל` but no name in source — single-row source gap, not a pattern). |
 | 2026-04-26 | Yeinot Bitan / Carrefour | local PriceFull (operator-fetched) | **source-clean**: 2,038 items, 0 empty `<ItemName>` | Two of our 5 Set-B `nan` barcodes found, both with names. Issue #1 (Carrefour-under-Yeinot-Bitan ChainId reuse) corroborated separately. |
 | 2026-04-26 | Hazi Hinam | local StoresFull + PriceFull (operator-fetched) | **source-clean**: 7,971 items, 0 empty `<ItemName>`; 13 stores, 0 empty Address, 1 empty City (7.69%) | Hazi Hinam ships names. The 103 `nan` products in our DB whose last writer must be hazi_hinam (because they're in hazi_hinam but not mahsani_hashuk, and hazi_hinam is the 8th of 9 in our scrape order) cannot be explained by source-side empty cells. Confirms the bug is in `il-supermarket-parser` or our handling of its output for Hazi Hinam's specific XML. |
+| 2026-04-26 | Mahsani Hashuk (`7290661400001`) | local StoresFull + PriceFull (operator-fetched, `laibcatalog.co.il`) | **multiple source-side defects** — see §9. StoresFull: 1 store row with all metadata fields blank (StoreId, name, address, city). PriceFull: non-standard schema — root `<Prices>` (not `<Root>`), items under `<Products>/<Product>` (not `<Items>/<Item>`), `<ChainID>` casing. Script reports 0 items inspected because it iterates `<Item>` only — that 0 is itself the schema-deviation finding, not a parsing limitation we should paper over. | New §9. |
+| 2026-04-26 | Victory (`7290696200003`) | local StoresFull (operator-fetched, `laibcatalog.co.il`) | **malformed XML at source** — see §8. File ends at line 646 after `</Store>` with no closing tags for parents (`</Stores>`, `</SubChain>`, `</SubChains>`, `</Root>` or whatever the wrapper is). Standard XML parsers reject the file. PriceFull not yet inspected because the StoresFull parse failure aborted the run. | New §8. |
 
 **Implication for Issue #6.** Three of our nine chains (Shufersal, Yeinot Bitan, Hazi Hinam) are now confirmed to ship product names cleanly at source. Yet our production DB has 1,126 product rows with `name='nan'`, all touched by either hazi_hinam (1,126) or mahsani_hashuk (1,023) — and 103 are in hazi_hinam alone. Since hazi_hinam's source is clean, those 103 are **lost in our pipeline** between gunzip and DB write. The `il-supermarket-parser` library (or its hazi_hinam-specific sub-class) is the prime suspect; chain-specific because Shufersal's pipeline (also MultiPageWeb engine) is clean. Worth localizing before treating Issue #6 as anything other than retracted.
 
-**Outstanding source verifications (next session):** Mahsani Ashuk (the only remaining "last-writer" suspect for the other 1,023 `nan` rows); a Cerberus chain (Rami Levy / Yohananof / Osher Ad / Tiv Taam) for parity across engines. Mahsani's portal: `https://laibcatalog.co.il/`. Cerberus chains need FTP-style auth so they're harder.
+**Outstanding source verifications (next session):** Mahsani's PriceFull `<ItemName>` rate (the script reported 0 items because of the `<Products>/<Product>` schema deviation — we'd need to either grep the raw file by hand or re-run with a schema-tolerant inspector if we choose to build one). A Cerberus chain (Rami Levy / Yohananof / Osher Ad / Tiv Taam) for parity across engines — these need FTP-style auth so they're harder. Victory's PriceFull also still untested (StoresFull parse failure aborted that run).
 
 ## How to verify against the raw source
 

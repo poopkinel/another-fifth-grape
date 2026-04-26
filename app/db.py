@@ -93,6 +93,36 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_events_server_ts ON events(server_ts);
             CREATE INDEX IF NOT EXISTS idx_events_distinct_id ON events(distinct_id);
             CREATE INDEX IF NOT EXISTS idx_events_event_name ON events(event_name);
+
+            CREATE TABLE IF NOT EXISTS promotions (
+                promo_id         TEXT PRIMARY KEY,
+                chain_id         TEXT NOT NULL,
+                store_id         TEXT NOT NULL,
+                promotion_id     TEXT NOT NULL,
+                description      TEXT,
+                start_at         TEXT,
+                end_at           TEXT,
+                reward_type      TEXT,
+                discounted_price REAL,
+                min_qty          REAL,
+                min_purchase_amt REAL,
+                update_date      TEXT,
+                raw_json         TEXT,
+                updated_at       TEXT NOT NULL
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_promotions_store ON promotions(store_id, chain_id);
+            CREATE INDEX IF NOT EXISTS idx_promotions_end_at ON promotions(end_at);
+
+            CREATE TABLE IF NOT EXISTS promotion_items (
+                promo_id  TEXT NOT NULL,
+                item_code TEXT NOT NULL,
+                is_gift   INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY (promo_id, item_code),
+                FOREIGN KEY (promo_id) REFERENCES promotions(promo_id) ON DELETE CASCADE
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_promotion_items_item ON promotion_items(item_code);
         """)
 
         existing_cols = {r[1] for r in conn.execute("PRAGMA table_info(stores)")}
@@ -182,6 +212,42 @@ def upsert_price(conn: sqlite3.Connection, price: dict):
             in_stock   = excluded.in_stock,
             updated_at = excluded.updated_at
     """, price)
+
+
+def upsert_promotion(conn: sqlite3.Connection, promo: dict):
+    conn.execute("""
+        INSERT INTO promotions (promo_id, chain_id, store_id, promotion_id,
+                                description, start_at, end_at, reward_type,
+                                discounted_price, min_qty, min_purchase_amt,
+                                update_date, raw_json, updated_at)
+        VALUES (:promo_id, :chain_id, :store_id, :promotion_id,
+                :description, :start_at, :end_at, :reward_type,
+                :discounted_price, :min_qty, :min_purchase_amt,
+                :update_date, :raw_json, :updated_at)
+        ON CONFLICT(promo_id) DO UPDATE SET
+            description       = excluded.description,
+            start_at          = excluded.start_at,
+            end_at            = excluded.end_at,
+            reward_type       = excluded.reward_type,
+            discounted_price  = excluded.discounted_price,
+            min_qty           = excluded.min_qty,
+            min_purchase_amt  = excluded.min_purchase_amt,
+            update_date       = excluded.update_date,
+            raw_json          = excluded.raw_json,
+            updated_at        = excluded.updated_at
+    """, promo)
+
+
+def replace_promotion_items(
+    conn: sqlite3.Connection, promo_id: str, items: list[dict]
+):
+    """items: [{"item_code": str, "is_gift": int}]. Replaces all rows for the promo."""
+    conn.execute("DELETE FROM promotion_items WHERE promo_id = ?", (promo_id,))
+    if items:
+        conn.executemany(
+            "INSERT INTO promotion_items (promo_id, item_code, is_gift) VALUES (?, ?, ?)",
+            [(promo_id, it["item_code"], int(it.get("is_gift", 0))) for it in items],
+        )
 
 
 # ── Read operations (used by API) ───────────────────────────────────

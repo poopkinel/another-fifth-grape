@@ -1,5 +1,6 @@
 """Scraper runner: downloads XMLs, parses them, loads into SQLite."""
 
+import json
 import logging
 import os
 import shutil
@@ -11,7 +12,15 @@ from il_supermarket_scarper import ScarpingTask
 from il_supermarket_scarper.utils import FileTypesFilters
 from il_supermarket_parsers import ConvertingTask
 
-from app.db import get_conn, init_db, upsert_store, upsert_product, upsert_price
+from app.db import (
+    get_conn,
+    init_db,
+    replace_promotion_items,
+    upsert_price,
+    upsert_product,
+    upsert_promotion,
+    upsert_store,
+)
 from app.scraper.chains import CHAINS, scraper_name_to_chain_id
 
 logger = logging.getLogger(__name__)
@@ -20,7 +29,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_FILE_LIMIT = None  # None = download all available files
 
 # STORE_FILE is not in all_full_files(), so we combine manually
-SCRAPE_FILE_TYPES = ["PRICE_FULL_FILE", "STORE_FILE"]
+SCRAPE_FILE_TYPES = ["PRICE_FULL_FILE", "STORE_FILE", "PROMO_FULL_FILE"]
 
 
 def run_scrape(chain_ids: list[str] | None = None, file_limit: int = DEFAULT_FILE_LIMIT):
@@ -106,6 +115,7 @@ def _load_chain(chain_id: str, scraper_name: str, parsed_dir: str):
     """Load parsed CSVs into SQLite."""
     _load_stores(chain_id, parsed_dir)
     _load_prices(chain_id, parsed_dir)
+    _load_promotions(chain_id, parsed_dir)
 
 
 def _load_stores(chain_id: str, parsed_dir: str):
@@ -226,6 +236,141 @@ def _load_prices(chain_id: str, parsed_dir: str):
                     "in_stock": 1 if in_stock else 0,
                     "updated_at": now,
                 })
+
+
+# Columns we don't want to dump into raw_json (already promoted to typed columns
+# or noisy XML metadata). Lowercased.
+_PROMO_RAW_DROP = {
+    "chainid", "subchainid", "storeid", "bikoretno",
+    "promotionid", "promotiondescription", "promotionupdatedate",
+    "promotionstartdate", "promotionstarthour",
+    "promotionenddate", "promotionendhour",
+    "rewardtype", "discountedprice", "minqty", "minpurchaseamnt",
+    "itemcode", "isgiftitem",
+}
+
+
+def _combine_date_hour(date_val, hour_val) -> str | None:
+    """CPFTA promo dates and hours are separate fields. Combine to ISO when both
+    are present; fall back to date alone."""
+    d = _nullable(date_val)
+    if not d:
+        return None
+    h = _nullable(hour_val)
+    if not h:
+        return d
+    return f"{d}T{h}"
+
+
+def _to_float(val) -> float | None:
+    s = _nullable(val)
+    if s is None:
+        return None
+    try:
+        return float(s.replace(",", ""))
+    except ValueError:
+        return None
+
+
+def _load_promotions(chain_id: str, parsed_dir: str):
+    """Load promotions + their item lists from parsed promofull CSVs.
+
+    The CSV is denormalized: one row per (promotion x item). We group by
+    (storeid, promotionid) and write one promotions row plus N promotion_items rows.
+    """
+    promo_files = [
+        f for f in os.listdir(parsed_dir)
+        if f.startswith("promo") and f.endswith(".csv")
+    ]
+    if not promo_files:
+        logger.info("No promo files found for %s", chain_id)
+        return
+
+    now = datetime.now(timezone.utc).isoformat()
+
+    with get_conn() as conn:
+        for pf in promo_files:
+            path = os.path.join(parsed_dir, pf)
+            try:
+                df = pd.read_csv(path, dtype=str)
+            except Exception as e:
+                logger.warning("Failed to read %s: %s", pf, e)
+                continue
+
+            df.columns = [c.strip().lower() for c in df.columns]
+
+            root_cols = [
+                c for c in ("chainid", "subchainid", "storeid", "bikoretno")
+                if c in df.columns
+            ]
+            if root_cols:
+                df[root_cols] = df[root_cols].ffill()
+
+            if "promotionid" not in df.columns or "storeid" not in df.columns:
+                logger.warning(
+                    "promofull %s missing promotionid/storeid columns; skipping", pf
+                )
+                continue
+
+            # Group: one promotion may span many rows (one per item)
+            grouped = df.groupby(["storeid", "promotionid"], sort=False, dropna=False)
+            for (storeid_raw, promotion_id_raw), group in grouped:
+                store_id = str(storeid_raw or "").strip().lstrip("0") or "0"
+                promotion_id = str(promotion_id_raw or "").strip()
+                if not promotion_id or promotion_id == "nan":
+                    continue
+                if store_id == "nan":
+                    continue
+
+                head = group.iloc[0]
+                promo_id = f"{chain_id}_{store_id}_{promotion_id}"
+
+                start_at = _combine_date_hour(
+                    head.get("promotionstartdate"), head.get("promotionstarthour")
+                )
+                end_at = _combine_date_hour(
+                    head.get("promotionenddate"), head.get("promotionendhour")
+                )
+
+                # raw_json: keep any feed columns we didn't promote so the data
+                # isn't lost if the regulator adds fields later.
+                extras = {
+                    col: _nullable(head.get(col))
+                    for col in group.columns
+                    if col not in _PROMO_RAW_DROP
+                }
+                extras = {k: v for k, v in extras.items() if v is not None}
+
+                upsert_promotion(conn, {
+                    "promo_id":         promo_id,
+                    "chain_id":         chain_id,
+                    "store_id":         f"{chain_id}_{store_id}",
+                    "promotion_id":     promotion_id,
+                    "description":      _nullable(head.get("promotiondescription")),
+                    "start_at":         start_at,
+                    "end_at":           end_at,
+                    "reward_type":      _nullable(head.get("rewardtype")),
+                    "discounted_price": _to_float(head.get("discountedprice")),
+                    "min_qty":          _to_float(head.get("minqty")),
+                    "min_purchase_amt": _to_float(head.get("minpurchaseamnt")),
+                    "update_date":      _nullable(head.get("promotionupdatedate")),
+                    "raw_json":         json.dumps(extras, ensure_ascii=False) if extras else None,
+                    "updated_at":       now,
+                })
+
+                items: list[dict] = []
+                seen: set[str] = set()
+                for _, row in group.iterrows():
+                    item_code = _nullable(row.get("itemcode"))
+                    if not item_code or item_code in seen:
+                        continue
+                    seen.add(item_code)
+                    is_gift_raw = _nullable(row.get("isgiftitem"))
+                    items.append({
+                        "item_code": item_code,
+                        "is_gift": 1 if is_gift_raw == "1" else 0,
+                    })
+                replace_promotion_items(conn, promo_id, items)
 
 
 def _nullable(val) -> str | None:

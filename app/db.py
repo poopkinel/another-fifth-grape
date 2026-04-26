@@ -190,14 +190,20 @@ def upsert_store(conn: sqlite3.Connection, store: dict):
 
 
 def upsert_product(conn: sqlite3.Connection, product: dict):
+    # Sticky-good policy: never overwrite a non-empty name/brand/unit/barcode
+    # with an empty or 'nan' value. Symptoms-level fix for parser data-loss for
+    # specific chains (see data_source_issues.md §6) — keeps good upstream data
+    # alive even when a later chain's pipeline path drops the field.
     conn.execute("""
         INSERT INTO products (product_id, name, brand, unit, barcode, emoji, category)
         VALUES (:product_id, :name, :brand, :unit, :barcode, :emoji, :category)
         ON CONFLICT(product_id) DO UPDATE SET
-            name     = excluded.name,
-            brand    = excluded.brand,
-            unit     = excluded.unit,
-            barcode  = excluded.barcode,
+            name     = CASE WHEN excluded.name IN ('', 'nan')
+                            THEN products.name
+                            ELSE excluded.name END,
+            brand    = COALESCE(NULLIF(excluded.brand, ''), products.brand),
+            unit     = COALESCE(NULLIF(excluded.unit,  ''), products.unit),
+            barcode  = COALESCE(excluded.barcode, products.barcode),
             emoji    = excluded.emoji,
             category = excluded.category
     """, product)

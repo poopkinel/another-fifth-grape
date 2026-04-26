@@ -197,6 +197,11 @@ def main():
     parser.add_argument("--limit", type=int, default=None, help="Max products to query this run")
     parser.add_argument("--dry-run", action="store_true", help="Query but don't write")
     parser.add_argument("--stats", action="store_true", help="Show coverage stats and exit")
+    parser.add_argument(
+        "--refresh-images",
+        action="store_true",
+        help="Re-query OFF for already-found products that have no image_url yet (backfill).",
+    )
     parser.add_argument("--verbose", "-v", action="store_true")
     args = parser.parse_args()
 
@@ -212,14 +217,30 @@ def main():
         show_stats()
         return
 
-    # Get unchecked barcoded products
-    sql = """
-        SELECT p.product_id, p.barcode, p.brand, p.emoji, p.category
-        FROM products p
-        LEFT JOIN off_lookups o ON p.product_id = o.product_id
-        WHERE p.barcode IS NOT NULL AND o.product_id IS NULL
-        ORDER BY p.product_id
-    """
+    # Pick rows to query.
+    # Default: barcoded products never checked yet (no off_lookups row).
+    # With --refresh-images: also include previously-found rows that still
+    # have no image_url, so the backfill picks them up.
+    if args.refresh_images:
+        sql = """
+            SELECT p.product_id, p.barcode, p.brand, p.emoji, p.category, p.image_url
+            FROM products p
+            LEFT JOIN off_lookups o ON p.product_id = o.product_id
+            WHERE p.barcode IS NOT NULL
+              AND (
+                  o.product_id IS NULL
+                  OR (o.status = 'found' AND p.image_url IS NULL)
+              )
+            ORDER BY p.product_id
+        """
+    else:
+        sql = """
+            SELECT p.product_id, p.barcode, p.brand, p.emoji, p.category, p.image_url
+            FROM products p
+            LEFT JOIN off_lookups o ON p.product_id = o.product_id
+            WHERE p.barcode IS NOT NULL AND o.product_id IS NULL
+            ORDER BY p.product_id
+        """
     if args.limit:
         sql += f" LIMIT {int(args.limit)}"
 
@@ -275,6 +296,11 @@ def main():
                     if (not row["category"]) and result["category"]:
                         sets.append("category = :category")
                         updates["category"] = result["category"]
+                    if result["image_url"] and (
+                        "image_url" not in row.keys() or not row["image_url"]
+                    ):
+                        sets.append("image_url = :image_url")
+                        updates["image_url"] = result["image_url"]
 
                     if sets:
                         updates["product_id"] = row["product_id"]

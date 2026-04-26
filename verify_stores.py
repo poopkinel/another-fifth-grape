@@ -194,6 +194,14 @@ def main():
              "give Places a wider net on the hard cases.",
     )
     parser.add_argument(
+        "--refetch-place-ids", action="store_true",
+        help="Re-query clusters that contain at least one row currently "
+             "'verified' but with NULL place_id (pre-existed the place_id "
+             "column). Writes ONLY place_id on those rows; never touches "
+             "verified_by_places or places_name. Populates identity needed "
+             "for downstream Places Details (opening hours) fetching.",
+    )
+    parser.add_argument(
         "--nearby-radius", type=int, default=DEFAULT_NEARBY_RADIUS_M,
         help=f"Radius in metres for Places Nearby Search (default {DEFAULT_NEARBY_RADIUS_M})",
     )
@@ -211,14 +219,31 @@ def main():
 
     init_db()
 
+    if args.refetch_place_ids and args.retry_unknown:
+        sys.exit("ERROR: --refetch-place-ids and --retry-unknown are mutually exclusive")
+
     # Find duplicate-address clusters to verify.
-    #   default mode    — clusters never checked (all rows have verified_by_places IS NULL).
-    #   --retry-unknown — clusters where at least one row is currently 'unknown'.
-    #                     We re-query because many of these failed the first time
-    #                     with empty city, which today's backfill fixed. Order
-    #                     city-inferred-today clusters first so the most-likely-
-    #                     to-flip work gets done even under --limit.
-    if args.retry_unknown:
+    #   default mode          — clusters never checked (all rows have verified_by_places IS NULL).
+    #   --retry-unknown       — clusters where at least one row is currently 'unknown'.
+    #                           We re-query because many of these failed the first time
+    #                           with empty city, which today's backfill fixed. Order
+    #                           city-inferred-today clusters first so the most-likely-
+    #                           to-flip work gets done even under --limit.
+    #   --refetch-place-ids   — clusters with ≥1 'verified' row missing place_id
+    #                           (pre-dated the column). Fills place_id only; never
+    #                           overwrites verified_by_places / places_name.
+    if args.refetch_place_ids:
+        clusters_sql = """
+            SELECT address, city
+            FROM stores
+            WHERE address != ''
+            GROUP BY address, city
+            HAVING COUNT(*) > 1
+               AND SUM(CASE WHEN verified_by_places = 'verified'
+                             AND place_id IS NULL THEN 1 ELSE 0 END) > 0
+            ORDER BY address, city
+        """
+    elif args.retry_unknown:
         # --only-all-unknown narrows to clusters where every row is unknown.
         # These are the hardest cases (Places found nothing on the previous
         # pass) and usually worth pairing with a wider --nearby-radius.
@@ -253,13 +278,17 @@ def main():
         clusters = conn.execute(clusters_sql).fetchall()
 
     if not clusters:
-        print("No unverified duplicate-address clusters.")
+        if args.refetch_place_ids:
+            print("No verified clusters with NULL place_id — nothing to refetch.")
+        else:
+            print("No unverified duplicate-address clusters.")
         return
 
-    print(f"Verifying {len(clusters)} clusters against Google Places ...")
+    label = "Refetching place_id for" if args.refetch_place_ids else "Verifying"
+    print(f"{label} {len(clusters)} clusters against Google Places ...")
     session = requests.Session()
 
-    n_verified = n_dropped = n_unknown = 0
+    n_verified = n_dropped = n_unknown = n_place_id_filled = n_place_id_candidates = 0
 
     for cluster in tqdm(clusters, unit="cluster"):
         address, city = cluster["address"], cluster["city"]
@@ -272,14 +301,15 @@ def main():
         # updates so we only touch rows currently 'unknown'.
         with get_conn() as conn:
             stores = conn.execute(
-                "SELECT chain_id, store_id, lat, lng, verified_by_places FROM stores "
-                "WHERE address = ? AND city = ?",
+                "SELECT chain_id, store_id, lat, lng, verified_by_places, place_id "
+                "FROM stores WHERE address = ? AND city = ?",
                 (address, city),
             ).fetchall()
 
         # Query both Places endpoints and union the chain sets
         chains_at_address: set[str] = set()
         name_by_chain: dict[str, str] = {}
+        place_id_by_chain: dict[str, str] = {}
         had_any_result = False
 
         try:
@@ -297,6 +327,8 @@ def main():
                 if cid:
                     chains_at_address.add(cid)
                     name_by_chain.setdefault(cid, r["name"])
+                    if r["place_id"]:
+                        place_id_by_chain.setdefault(cid, r["place_id"])
 
         # Nearby Search: use any store's lat/lng in the cluster (they all share the same coord)
         lat = next((s["lat"] for s in stores if s["lat"] is not None), None)
@@ -318,45 +350,85 @@ def main():
                     if cid:
                         chains_at_address.add(cid)
                         name_by_chain.setdefault(cid, r["name"])
+                        if r["place_id"]:
+                            place_id_by_chain.setdefault(cid, r["place_id"])
 
-        updates: list[tuple[str, str | None, str, str]] = []
+        if args.refetch_place_ids:
+            # Narrow, surgical updates: only fill place_id on rows already
+            # 'verified' that still have NULL place_id. Never overwrites
+            # verified_by_places or places_name. `pid_updates` is (place_id,
+            # chain_id, store_id) triples.
+            pid_updates: list[tuple[str, str, str]] = []
+            for s in stores:
+                if s["verified_by_places"] != "verified" or s["place_id"] is not None:
+                    continue
+                n_place_id_candidates += 1
+                pid = place_id_by_chain.get(s["chain_id"])
+                if not pid:
+                    continue  # chain at cluster wasn't found this pass; leave for manual review
+                pid_updates.append((pid, s["chain_id"], s["store_id"]))
+                n_place_id_filled += 1
+
+            if not args.dry_run and pid_updates:
+                with get_conn() as conn:
+                    conn.executemany(
+                        "UPDATE stores SET place_id = ? "
+                        "WHERE chain_id = ? AND store_id = ?",
+                        pid_updates,
+                    )
+            if args.verbose or args.dry_run:
+                for pid, chain_id, store_id in pid_updates:
+                    logger.info("  [place_id] %s/%s → %s", chain_id, store_id, pid)
+            time.sleep(QPS_DELAY)
+            continue
+
+        updates: list[tuple[str, str | None, str | None, str, str]] = []
         if not had_any_result:
             # Neither Google method returned anything — mark 'unknown'.
             for s in stores:
                 if args.retry_unknown and s["verified_by_places"] != "unknown":
                     continue  # keep existing verified / not_at_address decisions
-                updates.append(("unknown", None, s["chain_id"], s["store_id"]))
+                updates.append(("unknown", None, None, s["chain_id"], s["store_id"]))
                 n_unknown += 1
         else:
             for s in stores:
                 if args.retry_unknown and s["verified_by_places"] != "unknown":
                     continue  # keep existing verified / not_at_address decisions
                 if s["chain_id"] in chains_at_address:
-                    updates.append(("verified", name_by_chain[s["chain_id"]],
+                    updates.append(("verified",
+                                    name_by_chain[s["chain_id"]],
+                                    place_id_by_chain.get(s["chain_id"]),
                                     s["chain_id"], s["store_id"]))
                     n_verified += 1
                 else:
-                    updates.append(("not_at_address", None,
+                    updates.append(("not_at_address", None, None,
                                     s["chain_id"], s["store_id"]))
                     n_dropped += 1
 
         if not args.dry_run:
             with get_conn() as conn:
                 conn.executemany(
-                    "UPDATE stores SET verified_by_places = ?, places_name = ? "
+                    "UPDATE stores SET verified_by_places = ?, "
+                    "places_name = ?, place_id = ? "
                     "WHERE chain_id = ? AND store_id = ?",
                     updates,
                 )
         if args.verbose or args.dry_run:
-            for status, name, chain_id, store_id in updates:
+            for status, name, _pid, chain_id, store_id in updates:
                 logger.info("  [%s] %s/%s → %s", status, chain_id, store_id, name)
 
         time.sleep(QPS_DELAY)
 
     print(f"\nDone.")
-    print(f"  verified:       {n_verified}")
-    print(f"  not_at_address: {n_dropped}")
-    print(f"  unknown:        {n_unknown}")
+    if args.refetch_place_ids:
+        pct = (100.0 * n_place_id_filled / n_place_id_candidates) if n_place_id_candidates else 0.0
+        print(f"  place_id candidates: {n_place_id_candidates}")
+        print(f"  place_id filled:     {n_place_id_filled}  ({pct:.1f}%)")
+        print(f"  place_id missed:     {n_place_id_candidates - n_place_id_filled}")
+    else:
+        print(f"  verified:       {n_verified}")
+        print(f"  not_at_address: {n_dropped}")
+        print(f"  unknown:        {n_unknown}")
 
 
 if __name__ == "__main__":

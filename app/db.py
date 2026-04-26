@@ -54,7 +54,8 @@ def init_db():
                 unit       TEXT,
                 barcode    TEXT,
                 emoji      TEXT,
-                category   TEXT
+                category   TEXT,
+                image_url  TEXT
             );
 
             CREATE TABLE IF NOT EXISTS prices (
@@ -77,6 +78,21 @@ def init_db():
             );
 
             CREATE INDEX IF NOT EXISTS idx_prices_product_id ON prices(product_id);
+
+            CREATE TABLE IF NOT EXISTS events (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                distinct_id TEXT NOT NULL,
+                event_name  TEXT NOT NULL,
+                properties  TEXT NOT NULL DEFAULT '{}',
+                client_ts   INTEGER NOT NULL,
+                server_ts   INTEGER NOT NULL,
+                app_version TEXT,
+                platform    TEXT
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_events_server_ts ON events(server_ts);
+            CREATE INDEX IF NOT EXISTS idx_events_distinct_id ON events(distinct_id);
+            CREATE INDEX IF NOT EXISTS idx_events_event_name ON events(event_name);
         """)
 
         existing_cols = {r[1] for r in conn.execute("PRAGMA table_info(stores)")}
@@ -88,6 +104,8 @@ def init_db():
             conn.execute("ALTER TABLE products ADD COLUMN raw_name TEXT")
         if "canonical_product_id" not in product_cols:
             conn.execute("ALTER TABLE products ADD COLUMN canonical_product_id TEXT")
+        if "image_url" not in product_cols:
+            conn.execute("ALTER TABLE products ADD COLUMN image_url TEXT")
         conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_products_canonical "
             "ON products(canonical_product_id)"
@@ -105,6 +123,17 @@ def init_db():
             conn.execute("ALTER TABLE stores ADD COLUMN city_inferred_at TEXT")
         if "coords_refetched_at" not in existing_cols:
             conn.execute("ALTER TABLE stores ADD COLUMN coords_refetched_at TEXT")
+
+        if "place_id" not in existing_cols:
+            conn.execute("ALTER TABLE stores ADD COLUMN place_id TEXT")
+        if "opening_hours_json" not in existing_cols:
+            conn.execute("ALTER TABLE stores ADD COLUMN opening_hours_json TEXT")
+        if "opening_hours_tz" not in existing_cols:
+            conn.execute("ALTER TABLE stores ADD COLUMN opening_hours_tz TEXT")
+        # Forensic marker: set only when fetch_hours.py touches the row, even
+        # when Places returns no hours data (avoids re-querying unknowns).
+        if "opening_hours_fetched_at" not in existing_cols:
+            conn.execute("ALTER TABLE stores ADD COLUMN opening_hours_fetched_at TEXT")
 
 
 # ── Write operations (used by scraper) ──────────────────────────────
@@ -275,3 +304,29 @@ def get_last_scrape_time(conn: sqlite3.Connection) -> str | None:
         "SELECT finished_at FROM scrape_runs WHERE status='done' ORDER BY finished_at DESC LIMIT 1"
     ).fetchone()
     return row["finished_at"] if row else None
+
+
+def insert_events(
+    conn: sqlite3.Connection,
+    rows: list[tuple[str, str, str, int, int, str | None, str | None]],
+) -> int:
+    """Insert pre-validated event rows. Returns count inserted.
+
+    Each row: (distinct_id, event_name, properties_json, client_ts, server_ts, app_version, platform).
+    """
+    if not rows:
+        return 0
+    conn.executemany(
+        """INSERT INTO events
+               (distinct_id, event_name, properties, client_ts, server_ts, app_version, platform)
+           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        rows,
+    )
+    return len(rows)
+
+
+def prune_events_older_than(conn: sqlite3.Connection, cutoff_server_ts: int) -> int:
+    cur = conn.execute(
+        "DELETE FROM events WHERE server_ts < ?", (cutoff_server_ts,)
+    )
+    return cur.rowcount

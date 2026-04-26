@@ -1,0 +1,2281 @@
+# City inference audit — 2026-04-21
+
+**525 resolved / 214 unresolved**, of 739 empty-city rows.
+
+Grouped by inferred city, sorted by count descending. Scan each section for branches that don't actually belong to that city.
+
+Legend for `source`:
+
+- `abbrev:X` — Hebrew abbreviation in branch name (e.g. `פ"ת`)
+- `abbrev_addr:X` — abbreviation after comma in address
+- `city_branch:X` — city name as standalone token in branch
+- `city_address:X` — city name in canonical address position (after comma / end-of-string)
+
+---
+
+## Resolved (grouped by inferred city)
+
+### תל אביב — 37 rows
+
+- `hazi_hinam/hazi_hinam_132` [city_branch:…]
+  - branch: `קרפור סיטי  ויצמן תל אביב`
+  - addr: `20 ויצמן`
+- `hazi_hinam/hazi_hinam_274` [abbrev:ת"א]
+  - branch: `אקספרס ת"א- פלורנטין`
+  - addr: `פלורנטין 27`
+- `hazi_hinam/hazi_hinam_733` [city_branch:…]
+  - branch: `בן יהודה תל אביב`
+  - addr: `בן יהודה 23`
+- `hazi_hinam/hazi_hinam_735` [city_branch:…]
+  - branch: `החשמונאים תל אביב`
+  - addr: `חשמונאים 100`
+- `hazi_hinam/hazi_hinam_736` [city_branch:…]
+  - branch: `שוקן תל אביב`
+  - addr: `שוקן 1`
+- `mahsani_hashuk/mahsani_hashuk_132` [city_branch:…]
+  - branch: `קרפור סיטי  ויצמן תל אביב`
+  - addr: `20 ויצמן`
+- `mahsani_hashuk/mahsani_hashuk_733` [city_branch:…]
+  - branch: `בן יהודה תל אביב`
+  - addr: `בן יהודה 23`
+- `mahsani_hashuk/mahsani_hashuk_734` [city_branch:…]
+  - branch: `אסתר המלכה תל אביב`
+  - addr: `אסתר המלכה 4`
+- `mahsani_hashuk/mahsani_hashuk_735` [city_branch:…]
+  - branch: `החשמונאים תל אביב`
+  - addr: `חשמונאים 100`
+- `mahsani_hashuk/mahsani_hashuk_736` [city_branch:…]
+  - branch: `שוקן תל אביב`
+  - addr: `שוקן 1`
+- `mahsani_hashuk/mahsani_hashuk_737` [city_branch:…]
+  - branch: `בן יהודה תל אביב`
+  - addr: `בן יהודה 174`
+- `osher_ad/osher_ad_274` [abbrev:ת"א]
+  - branch: `אקספרס ת"א- פלורנטין`
+  - addr: `פלורנטין 27`
+- `osher_ad/osher_ad_733` [city_branch:…]
+  - branch: `בן יהודה תל אביב`
+  - addr: `בן יהודה 23`
+- `osher_ad/osher_ad_735` [city_branch:…]
+  - branch: `החשמונאים תל אביב`
+  - addr: `חשמונאים 100`
+- `osher_ad/osher_ad_736` [city_branch:…]
+  - branch: `שוקן תל אביב`
+  - addr: `שוקן 1`
+- `rami_levy/rami_levy_274` [abbrev:ת"א]
+  - branch: `אקספרס ת"א- פלורנטין`
+  - addr: `פלורנטין 27`
+- `rami_levy/rami_levy_733` [city_branch:…]
+  - branch: `בן יהודה תל אביב`
+  - addr: `בן יהודה 23`
+- `rami_levy/rami_levy_735` [city_branch:…]
+  - branch: `החשמונאים תל אביב`
+  - addr: `חשמונאים 100`
+- `rami_levy/rami_levy_736` [city_branch:…]
+  - branch: `שוקן תל אביב`
+  - addr: `שוקן 1`
+- `shufersal/shufersal_274` [abbrev:ת"א]
+  - branch: `אקספרס ת"א- פלורנטין`
+  - addr: `פלורנטין 27`
+- `tiv_taam/tiv_taam_274` [abbrev:ת"א]
+  - branch: `אקספרס ת"א- פלורנטין`
+  - addr: `פלורנטין 27`
+- `tiv_taam/tiv_taam_733` [city_branch:…]
+  - branch: `בן יהודה תל אביב`
+  - addr: `בן יהודה 23`
+- `tiv_taam/tiv_taam_735` [city_branch:…]
+  - branch: `החשמונאים תל אביב`
+  - addr: `חשמונאים 100`
+- `tiv_taam/tiv_taam_736` [city_branch:…]
+  - branch: `שוקן תל אביב`
+  - addr: `שוקן 1`
+- `victory/victory_274` [abbrev:ת"א]
+  - branch: `אקספרס ת"א- פלורנטין`
+  - addr: `פלורנטין 27`
+- `victory/victory_733` [city_branch:…]
+  - branch: `בן יהודה תל אביב`
+  - addr: `בן יהודה 23`
+- `victory/victory_735` [city_branch:…]
+  - branch: `החשמונאים תל אביב`
+  - addr: `חשמונאים 100`
+- `victory/victory_736` [city_branch:…]
+  - branch: `שוקן תל אביב`
+  - addr: `שוקן 1`
+- `yeinot_bitan/yeinot_bitan_132` [city_branch:…]
+  - branch: `קרפור סיטי  ויצמן תל אביב`
+  - addr: `20 ויצמן`
+- `yeinot_bitan/yeinot_bitan_274` [abbrev:ת"א]
+  - branch: `אקספרס ת"א- פלורנטין`
+  - addr: `פלורנטין 27`
+- `yeinot_bitan/yeinot_bitan_733` [city_branch:…]
+  - branch: `בן יהודה תל אביב`
+  - addr: `בן יהודה 23`
+- `yeinot_bitan/yeinot_bitan_735` [city_branch:…]
+  - branch: `החשמונאים תל אביב`
+  - addr: `חשמונאים 100`
+- `yeinot_bitan/yeinot_bitan_736` [city_branch:…]
+  - branch: `שוקן תל אביב`
+  - addr: `שוקן 1`
+- `yohananof/yohananof_274` [abbrev:ת"א]
+  - branch: `אקספרס ת"א- פלורנטין`
+  - addr: `פלורנטין 27`
+- `yohananof/yohananof_733` [city_branch:…]
+  - branch: `בן יהודה תל אביב`
+  - addr: `בן יהודה 23`
+- `yohananof/yohananof_735` [city_branch:…]
+  - branch: `החשמונאים תל אביב`
+  - addr: `חשמונאים 100`
+- `yohananof/yohananof_736` [city_branch:…]
+  - branch: `שוקן תל אביב`
+  - addr: `שוקן 1`
+
+### נתניה — 32 rows
+
+- `hazi_hinam/hazi_hinam_2410` [city_branch:…]
+  - branch: `קרפור מרקט  עיר ימים נתניה (2410)`
+  - addr: `שדרות בן גוריון`
+- `hazi_hinam/hazi_hinam_2577` [city_branch:…]
+  - branch: `קרפור סיטי לב נתניה (2577)`
+  - addr: `32 הרב קוק`
+- `hazi_hinam/hazi_hinam_3280` [city_branch:…]
+  - branch: `קרפור סיטי  אלוני השרון נתניה (3280)`
+  - addr: `תום לנטוס 26 ק.השרון`
+- `hazi_hinam/hazi_hinam_502` [city_branch:…] _(no-coords)_
+  - branch: `ליקוט נתניה`
+- `hazi_hinam/hazi_hinam_720` [city_branch:…]
+  - branch: `הרטום נתניה`
+  - addr: `הרטום 40`
+- `hazi_hinam/hazi_hinam_721` [city_branch:…]
+  - branch: `שוויצריה ויצמן נתניה`
+  - addr: `וייצמן 14`
+- `hazi_hinam/hazi_hinam_906` [city_branch:…]
+  - branch: `קרפור סיטי  מרכז נתניה`
+  - addr: `שטמפר`
+- `hazi_hinam/hazi_hinam_981` [city_branch:…]
+  - branch: `קרפור סיטי אזורים נתניה`
+  - addr: `14 גרינבאום יצחק`
+- `mahsani_hashuk/mahsani_hashuk_502` [city_branch:…] _(no-coords)_
+  - branch: `ליקוט נתניה`
+- `mahsani_hashuk/mahsani_hashuk_720` [city_branch:…]
+  - branch: `הרטום נתניה`
+  - addr: `הרטום 40`
+- `mahsani_hashuk/mahsani_hashuk_721` [city_branch:…]
+  - branch: `שוויצריה ויצמן נתניה`
+  - addr: `וייצמן 14`
+- `osher_ad/osher_ad_720` [city_branch:…]
+  - branch: `הרטום נתניה`
+  - addr: `הרטום 40`
+- `osher_ad/osher_ad_721` [city_branch:…]
+  - branch: `שוויצריה ויצמן נתניה`
+  - addr: `וייצמן 14`
+- `rami_levy/rami_levy_024` [city_branch:…]
+  - branch: `נתניה`
+  - addr: `המחקר 3`
+- `rami_levy/rami_levy_037` [city_branch:…]
+  - branch: `נתניה חדש`
+  - addr: `האורזים 8`
+- `rami_levy/rami_levy_720` [city_branch:…]
+  - branch: `הרטום נתניה`
+  - addr: `הרטום 40`
+- `rami_levy/rami_levy_721` [city_branch:…]
+  - branch: `שוויצריה ויצמן נתניה`
+  - addr: `וייצמן 14`
+- `tiv_taam/tiv_taam_502` [city_branch:…] _(no-coords)_
+  - branch: `ליקוט נתניה`
+- `tiv_taam/tiv_taam_720` [city_branch:…]
+  - branch: `הרטום נתניה`
+  - addr: `הרטום 40`
+- `tiv_taam/tiv_taam_721` [city_branch:…]
+  - branch: `שוויצריה ויצמן נתניה`
+  - addr: `וייצמן 14`
+- `victory/victory_720` [city_branch:…]
+  - branch: `הרטום נתניה`
+  - addr: `הרטום 40`
+- `victory/victory_721` [city_branch:…]
+  - branch: `שוויצריה ויצמן נתניה`
+  - addr: `וייצמן 14`
+- `yeinot_bitan/yeinot_bitan_2410` [city_branch:…]
+  - branch: `קרפור מרקט  עיר ימים נתניה (2410)`
+  - addr: `שדרות בן גוריון`
+- `yeinot_bitan/yeinot_bitan_2577` [city_branch:…]
+  - branch: `קרפור סיטי לב נתניה (2577)`
+  - addr: `32 הרב קוק`
+- `yeinot_bitan/yeinot_bitan_3280` [city_branch:…]
+  - branch: `קרפור סיטי  אלוני השרון נתניה (3280)`
+  - addr: `תום לנטוס 26 ק.השרון`
+- `yeinot_bitan/yeinot_bitan_502` [city_branch:…] _(no-coords)_
+  - branch: `ליקוט נתניה`
+- `yeinot_bitan/yeinot_bitan_720` [city_branch:…]
+  - branch: `הרטום נתניה`
+  - addr: `הרטום 40`
+- `yeinot_bitan/yeinot_bitan_721` [city_branch:…]
+  - branch: `שוויצריה ויצמן נתניה`
+  - addr: `וייצמן 14`
+- `yeinot_bitan/yeinot_bitan_906` [city_branch:…]
+  - branch: `קרפור סיטי  מרכז נתניה`
+  - addr: `שטמפר`
+- `yeinot_bitan/yeinot_bitan_981` [city_branch:…]
+  - branch: `קרפור סיטי אזורים נתניה`
+  - addr: `14 גרינבאום יצחק`
+- `yohananof/yohananof_720` [city_branch:…]
+  - branch: `הרטום נתניה`
+  - addr: `הרטום 40`
+- `yohananof/yohananof_721` [city_branch:…]
+  - branch: `שוויצריה ויצמן נתניה`
+  - addr: `וייצמן 14`
+
+### פתח תקווה — 32 rows
+
+- `hazi_hinam/hazi_hinam_2750` [abbrev:פ"ת]
+  - branch: `קרפור  עמישב פ"ת (2750)`
+  - addr: `דרך מנחם בגין 96`
+- `hazi_hinam/hazi_hinam_3600` [abbrev:פ"ת]
+  - branch: `קרפור מרקט  שטמפפר פ"ת (3600)`
+  - addr: `שטמפפר 73, פינת אבניאל פ"ת`
+- `hazi_hinam/hazi_hinam_724` [city_branch:…]
+  - branch: `קניון אבנת פתח תקווה`
+  - addr: `זבוטינסקי 72`
+- `hazi_hinam/hazi_hinam_725` [city_branch:…]
+  - branch: `שטמפפר פתח תקווה`
+  - addr: `שטמפפר 37`
+- `hazi_hinam/hazi_hinam_726` [city_branch:…]
+  - branch: `רוטשילד פתח תקווה`
+  - addr: `רוטשילד 182`
+- `mahsani_hashuk/mahsani_hashuk_021` [city_branch:…]
+  - branch: `סגולה פתח תקווה`
+  - addr: `סגולה`
+- `mahsani_hashuk/mahsani_hashuk_209` [abbrev_addr:פ"ת]
+  - branch: `כל בו חצי חינם אם המושבות`
+  - addr: `ראשון לציון 1 , פ"ת , ישראל`
+- `mahsani_hashuk/mahsani_hashuk_413` [abbrev:פ"ת]
+  - branch: `קרפור סיטי  בילינסון פ"ת (1279)`
+  - addr: `קפלן 13`
+- `mahsani_hashuk/mahsani_hashuk_724` [city_branch:…]
+  - branch: `קניון אבנת פתח תקווה`
+  - addr: `זבוטינסקי 72`
+- `mahsani_hashuk/mahsani_hashuk_725` [city_branch:…]
+  - branch: `שטמפפר פתח תקווה`
+  - addr: `שטמפפר 37`
+- `mahsani_hashuk/mahsani_hashuk_726` [city_branch:…]
+  - branch: `רוטשילד פתח תקווה`
+  - addr: `רוטשילד 182`
+- `osher_ad/osher_ad_724` [city_branch:…]
+  - branch: `קניון אבנת פתח תקווה`
+  - addr: `זבוטינסקי 72`
+- `osher_ad/osher_ad_725` [city_branch:…]
+  - branch: `שטמפפר פתח תקווה`
+  - addr: `שטמפפר 37`
+- `osher_ad/osher_ad_726` [city_branch:…]
+  - branch: `רוטשילד פתח תקווה`
+  - addr: `רוטשילד 182`
+- `rami_levy/rami_levy_034` [city_branch:…]
+  - branch: `פתח תקווה`
+  - addr: `הסיבים 37`
+- `rami_levy/rami_levy_724` [city_branch:…]
+  - branch: `קניון אבנת פתח תקווה`
+  - addr: `זבוטינסקי 72`
+- `rami_levy/rami_levy_725` [city_branch:…]
+  - branch: `שטמפפר פתח תקווה`
+  - addr: `שטמפפר 37`
+- `rami_levy/rami_levy_726` [city_branch:…]
+  - branch: `רוטשילד פתח תקווה`
+  - addr: `רוטשילד 182`
+- `tiv_taam/tiv_taam_724` [city_branch:…]
+  - branch: `קניון אבנת פתח תקווה`
+  - addr: `זבוטינסקי 72`
+- `tiv_taam/tiv_taam_725` [city_branch:…]
+  - branch: `שטמפפר פתח תקווה`
+  - addr: `שטמפפר 37`
+- `tiv_taam/tiv_taam_726` [city_branch:…]
+  - branch: `רוטשילד פתח תקווה`
+  - addr: `רוטשילד 182`
+- `victory/victory_724` [city_branch:…]
+  - branch: `קניון אבנת פתח תקווה`
+  - addr: `זבוטינסקי 72`
+- `victory/victory_725` [city_branch:…]
+  - branch: `שטמפפר פתח תקווה`
+  - addr: `שטמפפר 37`
+- `victory/victory_726` [city_branch:…]
+  - branch: `רוטשילד פתח תקווה`
+  - addr: `רוטשילד 182`
+- `yeinot_bitan/yeinot_bitan_2750` [abbrev:פ"ת]
+  - branch: `קרפור  עמישב פ"ת (2750)`
+  - addr: `דרך מנחם בגין 96`
+- `yeinot_bitan/yeinot_bitan_3600` [abbrev:פ"ת]
+  - branch: `קרפור מרקט  שטמפפר פ"ת (3600)`
+  - addr: `שטמפפר 73, פינת אבניאל פ"ת`
+- `yeinot_bitan/yeinot_bitan_724` [city_branch:…]
+  - branch: `קניון אבנת פתח תקווה`
+  - addr: `זבוטינסקי 72`
+- `yeinot_bitan/yeinot_bitan_725` [city_branch:…]
+  - branch: `שטמפפר פתח תקווה`
+  - addr: `שטמפפר 37`
+- `yeinot_bitan/yeinot_bitan_726` [city_branch:…]
+  - branch: `רוטשילד פתח תקווה`
+  - addr: `רוטשילד 182`
+- `yohananof/yohananof_724` [city_branch:…]
+  - branch: `קניון אבנת פתח תקווה`
+  - addr: `זבוטינסקי 72`
+- `yohananof/yohananof_725` [city_branch:…]
+  - branch: `שטמפפר פתח תקווה`
+  - addr: `שטמפפר 37`
+- `yohananof/yohananof_726` [city_branch:…]
+  - branch: `רוטשילד פתח תקווה`
+  - addr: `רוטשילד 182`
+
+### חיפה — 30 rows
+
+- `hazi_hinam/hazi_hinam_212` [city_branch:…]
+  - branch: `שלי חיפה- ורדיה`
+  - addr: `ורדיה 10`
+- `hazi_hinam/hazi_hinam_336` [city_branch:…]
+  - branch: `שלי חיפה- רמות ספיר`
+  - addr: `רח' גוט לוין 48`
+- `hazi_hinam/hazi_hinam_359` [city_branch:…]
+  - branch: `דיל חיפה- גרנד קניון`
+  - addr: `שמחה גולן 54`
+- `hazi_hinam/hazi_hinam_3610` [city_branch:…]
+  - branch: `שוק מהדרין הרצל חיפה (3610)`
+  - addr: `הרצל 97`
+- `hazi_hinam/hazi_hinam_4280` [city_branch:…]
+  - branch: `קרפור מרקט  אודיטוריום חיפה (4280)`
+  - addr: `134 שדרות הנשיא`
+- `mahsani_hashuk/mahsani_hashuk_140` [city_branch:…]
+  - branch: `קרפור סיטי  גרינברג חיפה`
+  - addr: `20 א.צ גרינברג`
+- `osher_ad/osher_ad_212` [city_branch:…]
+  - branch: `שלי חיפה- ורדיה`
+  - addr: `ורדיה 10`
+- `osher_ad/osher_ad_336` [city_branch:…]
+  - branch: `שלי חיפה- רמות ספיר`
+  - addr: `רח' גוט לוין 48`
+- `osher_ad/osher_ad_359` [city_branch:…]
+  - branch: `דיל חיפה- גרנד קניון`
+  - addr: `שמחה גולן 54`
+- `rami_levy/rami_levy_057` [city_branch:…] _(no-coords)_
+  - branch: `עזריאלי חיפה`
+- `rami_levy/rami_levy_212` [city_branch:…]
+  - branch: `שלי חיפה- ורדיה`
+  - addr: `ורדיה 10`
+- `rami_levy/rami_levy_336` [city_branch:…]
+  - branch: `שלי חיפה- רמות ספיר`
+  - addr: `רח' גוט לוין 48`
+- `rami_levy/rami_levy_359` [city_branch:…]
+  - branch: `דיל חיפה- גרנד קניון`
+  - addr: `שמחה גולן 54`
+- `shufersal/shufersal_212` [city_branch:…]
+  - branch: `שלי חיפה- ורדיה`
+  - addr: `ורדיה 10`
+- `shufersal/shufersal_336` [city_branch:…]
+  - branch: `שלי חיפה- רמות ספיר`
+  - addr: `רח' גוט לוין 48`
+- `shufersal/shufersal_359` [city_branch:…]
+  - branch: `דיל חיפה- גרנד קניון`
+  - addr: `שמחה גולן 54`
+- `tiv_taam/tiv_taam_212` [city_branch:…]
+  - branch: `שלי חיפה- ורדיה`
+  - addr: `ורדיה 10`
+- `tiv_taam/tiv_taam_336` [city_branch:…]
+  - branch: `שלי חיפה- רמות ספיר`
+  - addr: `רח' גוט לוין 48`
+- `tiv_taam/tiv_taam_359` [city_branch:…]
+  - branch: `דיל חיפה- גרנד קניון`
+  - addr: `שמחה גולן 54`
+- `victory/victory_212` [city_branch:…]
+  - branch: `שלי חיפה- ורדיה`
+  - addr: `ורדיה 10`
+- `victory/victory_336` [city_branch:…]
+  - branch: `שלי חיפה- רמות ספיר`
+  - addr: `רח' גוט לוין 48`
+- `victory/victory_359` [city_branch:…]
+  - branch: `דיל חיפה- גרנד קניון`
+  - addr: `שמחה גולן 54`
+- `yeinot_bitan/yeinot_bitan_212` [city_branch:…]
+  - branch: `שלי חיפה- ורדיה`
+  - addr: `ורדיה 10`
+- `yeinot_bitan/yeinot_bitan_336` [city_branch:…]
+  - branch: `שלי חיפה- רמות ספיר`
+  - addr: `רח' גוט לוין 48`
+- `yeinot_bitan/yeinot_bitan_359` [city_branch:…]
+  - branch: `דיל חיפה- גרנד קניון`
+  - addr: `שמחה גולן 54`
+- `yeinot_bitan/yeinot_bitan_3610` [city_branch:…]
+  - branch: `שוק מהדרין הרצל חיפה (3610)`
+  - addr: `הרצל 97`
+- `yeinot_bitan/yeinot_bitan_4280` [city_branch:…]
+  - branch: `קרפור מרקט  אודיטוריום חיפה (4280)`
+  - addr: `134 שדרות הנשיא`
+- `yohananof/yohananof_212` [city_branch:…]
+  - branch: `שלי חיפה- ורדיה`
+  - addr: `ורדיה 10`
+- `yohananof/yohananof_336` [city_branch:…]
+  - branch: `שלי חיפה- רמות ספיר`
+  - addr: `רח' גוט לוין 48`
+- `yohananof/yohananof_359` [city_branch:…]
+  - branch: `דיל חיפה- גרנד קניון`
+  - addr: `שמחה גולן 54`
+
+### אשדוד — 27 rows
+
+- `hazi_hinam/hazi_hinam_161` [city_branch:…]
+  - branch: `המפיץ סיטונאות אשדוד`
+  - addr: `הבושם 16`
+- `hazi_hinam/hazi_hinam_2330` [city_branch:…]
+  - branch: `קרפור סיטי  אשדוד י"ב (2330)`
+  - addr: `תמוז 14 מרכז מסחרי`
+- `hazi_hinam/hazi_hinam_2840` [city_branch:…]
+  - branch: `קרפור מרקט  אשדוד ח (2840)`
+  - addr: `הרב לוין מ.מסחרי`
+- `hazi_hinam/hazi_hinam_503` [city_branch:…] _(no-coords)_
+  - branch: `ליקוט טיב טעם אשדוד`
+- `hazi_hinam/hazi_hinam_709` [city_branch:…]
+  - branch: `שבט לוי אשדוד`
+  - addr: `שבט לוי 14 רובע יב`
+- `mahsani_hashuk/mahsani_hashuk_005` [city_branch:…]
+  - branch: `אשדוד`
+  - addr: `זבוטינסקי 27, סטאר סנטר`
+- `mahsani_hashuk/mahsani_hashuk_353` [city_branch:…]
+  - branch: `קרפור סיטי  הצרכנייה אשדוד ד`
+  - addr: `25 רוגוזין`
+- `mahsani_hashuk/mahsani_hashuk_503` [city_branch:…] _(no-coords)_
+  - branch: `ליקוט טיב טעם אשדוד`
+- `mahsani_hashuk/mahsani_hashuk_709` [city_branch:…]
+  - branch: `שבט לוי אשדוד`
+  - addr: `שבט לוי 14 רובע יב`
+- `osher_ad/osher_ad_161` [city_branch:…]
+  - branch: `המפיץ סיטונאות אשדוד`
+  - addr: `הבושם 16`
+- `osher_ad/osher_ad_709` [city_branch:…]
+  - branch: `שבט לוי אשדוד`
+  - addr: `שבט לוי 14 רובע יב`
+- `rami_levy/rami_levy_026` [city_branch:…]
+  - branch: `אשדוד`
+  - addr: `היהלומים 8`
+- `rami_levy/rami_levy_161` [city_branch:…]
+  - branch: `המפיץ סיטונאות אשדוד`
+  - addr: `הבושם 16`
+- `rami_levy/rami_levy_709` [city_branch:…]
+  - branch: `שבט לוי אשדוד`
+  - addr: `שבט לוי 14 רובע יב`
+- `shufersal/shufersal_161` [city_branch:…]
+  - branch: `המפיץ סיטונאות אשדוד`
+  - addr: `הבושם 16`
+- `tiv_taam/tiv_taam_161` [city_branch:…]
+  - branch: `המפיץ סיטונאות אשדוד`
+  - addr: `הבושם 16`
+- `tiv_taam/tiv_taam_503` [city_branch:…] _(no-coords)_
+  - branch: `ליקוט טיב טעם אשדוד`
+- `tiv_taam/tiv_taam_709` [city_branch:…]
+  - branch: `שבט לוי אשדוד`
+  - addr: `שבט לוי 14 רובע יב`
+- `victory/victory_161` [city_branch:…]
+  - branch: `המפיץ סיטונאות אשדוד`
+  - addr: `הבושם 16`
+- `victory/victory_709` [city_branch:…]
+  - branch: `שבט לוי אשדוד`
+  - addr: `שבט לוי 14 רובע יב`
+- `yeinot_bitan/yeinot_bitan_161` [city_branch:…]
+  - branch: `המפיץ סיטונאות אשדוד`
+  - addr: `הבושם 16`
+- `yeinot_bitan/yeinot_bitan_2330` [city_branch:…]
+  - branch: `קרפור סיטי  אשדוד י"ב (2330)`
+  - addr: `תמוז 14 מרכז מסחרי`
+- `yeinot_bitan/yeinot_bitan_2840` [city_branch:…]
+  - branch: `קרפור מרקט  אשדוד ח (2840)`
+  - addr: `הרב לוין מ.מסחרי`
+- `yeinot_bitan/yeinot_bitan_503` [city_branch:…] _(no-coords)_
+  - branch: `ליקוט טיב טעם אשדוד`
+- `yeinot_bitan/yeinot_bitan_709` [city_branch:…]
+  - branch: `שבט לוי אשדוד`
+  - addr: `שבט לוי 14 רובע יב`
+- `yohananof/yohananof_161` [city_branch:…]
+  - branch: `המפיץ סיטונאות אשדוד`
+  - addr: `הבושם 16`
+- `yohananof/yohananof_709` [city_branch:…]
+  - branch: `שבט לוי אשדוד`
+  - addr: `שבט לוי 14 רובע יב`
+
+### באר שבע — 23 rows
+
+- `hazi_hinam/hazi_hinam_233` [city_branch:…] _(no-coords)_
+  - branch: `BE באר שבע`
+- `hazi_hinam/hazi_hinam_2976` [city_branch:…]
+  - branch: `קרפור סיטי  צפון באר-שבע (2976)`
+  - addr: `101 אברהם אבינו`
+- `hazi_hinam/hazi_hinam_515` [city_branch:…] _(no-coords)_
+  - branch: `ליקוט טיב באר שבע`
+- `hazi_hinam/hazi_hinam_711` [city_branch:…]
+  - branch: `רגר באר שבע`
+  - addr: `יעקב כהן 12`
+- `mahsani_hashuk/mahsani_hashuk_515` [city_branch:…] _(no-coords)_
+  - branch: `ליקוט טיב באר שבע`
+- `mahsani_hashuk/mahsani_hashuk_711` [city_branch:…]
+  - branch: `רגר באר שבע`
+  - addr: `יעקב כהן 12`
+- `osher_ad/osher_ad_233` [city_branch:…] _(no-coords)_
+  - branch: `BE באר שבע`
+- `osher_ad/osher_ad_711` [city_branch:…]
+  - branch: `רגר באר שבע`
+  - addr: `יעקב כהן 12`
+- `rami_levy/rami_levy_027` [city_branch:…]
+  - branch: `באר שבע`
+  - addr: `הע"ל 7 עמק שרה`
+- `rami_levy/rami_levy_233` [city_branch:…] _(no-coords)_
+  - branch: `BE באר שבע`
+- `rami_levy/rami_levy_711` [city_branch:…]
+  - branch: `רגר באר שבע`
+  - addr: `יעקב כהן 12`
+- `shufersal/shufersal_233` [city_branch:…] _(no-coords)_
+  - branch: `BE באר שבע`
+- `tiv_taam/tiv_taam_233` [city_branch:…] _(no-coords)_
+  - branch: `BE באר שבע`
+- `tiv_taam/tiv_taam_515` [city_branch:…] _(no-coords)_
+  - branch: `ליקוט טיב באר שבע`
+- `tiv_taam/tiv_taam_711` [city_branch:…]
+  - branch: `רגר באר שבע`
+  - addr: `יעקב כהן 12`
+- `victory/victory_233` [city_branch:…] _(no-coords)_
+  - branch: `BE באר שבע`
+- `victory/victory_711` [city_branch:…]
+  - branch: `רגר באר שבע`
+  - addr: `יעקב כהן 12`
+- `yeinot_bitan/yeinot_bitan_233` [city_branch:…] _(no-coords)_
+  - branch: `BE באר שבע`
+- `yeinot_bitan/yeinot_bitan_2976` [city_branch:…]
+  - branch: `קרפור סיטי  צפון באר-שבע (2976)`
+  - addr: `101 אברהם אבינו`
+- `yeinot_bitan/yeinot_bitan_515` [city_branch:…] _(no-coords)_
+  - branch: `ליקוט טיב באר שבע`
+- `yeinot_bitan/yeinot_bitan_711` [city_branch:…]
+  - branch: `רגר באר שבע`
+  - addr: `יעקב כהן 12`
+- `yohananof/yohananof_233` [city_branch:…] _(no-coords)_
+  - branch: `BE באר שבע`
+- `yohananof/yohananof_711` [city_branch:…]
+  - branch: `רגר באר שבע`
+  - addr: `יעקב כהן 12`
+
+### ירושלים — 21 rows
+
+- `hazi_hinam/hazi_hinam_3420` [city_branch:…]
+  - branch: `קרפור מרקט  אלנבי ירושלים (3420)`
+  - addr: `בית"ר פינת ינובסקי`
+- `hazi_hinam/hazi_hinam_610` [city_branch:…]
+  - branch: `יש חסד ירושלים- רמת שלמה`
+  - addr: `ברכת אברהם 22`
+- `hazi_hinam/hazi_hinam_78` [city_branch:…]
+  - branch: `יש הר נוף ירושלים-שאולזו`
+  - addr: `שאולזון 56`
+- `mahsani_hashuk/mahsani_hashuk_020` [city_branch:…]
+  - branch: `ירושלים תלפיות`
+  - addr: `האומן`
+- `mahsani_hashuk/mahsani_hashuk_128` [city_branch:…]
+  - branch: `היפר ירושלים תלפיות`
+  - addr: `האומן 14, ירושלים`
+- `mahsani_hashuk/mahsani_hashuk_620` [city_branch:…]
+  - branch: `קרפור סיטי  ירושלים נתניה`
+  - addr: `29 ירושלים`
+- `osher_ad/osher_ad_610` [city_branch:…]
+  - branch: `יש חסד ירושלים- רמת שלמה`
+  - addr: `ברכת אברהם 22`
+- `osher_ad/osher_ad_78` [city_branch:…]
+  - branch: `יש הר נוף ירושלים-שאולזו`
+  - addr: `שאולזון 56`
+- `rami_levy/rami_levy_610` [city_branch:…]
+  - branch: `יש חסד ירושלים- רמת שלמה`
+  - addr: `ברכת אברהם 22`
+- `rami_levy/rami_levy_78` [city_branch:…]
+  - branch: `יש הר נוף ירושלים-שאולזו`
+  - addr: `שאולזון 56`
+- `shufersal/shufersal_610` [city_branch:…]
+  - branch: `יש חסד ירושלים- רמת שלמה`
+  - addr: `ברכת אברהם 22`
+- `shufersal/shufersal_78` [city_branch:…]
+  - branch: `יש הר נוף ירושלים-שאולזו`
+  - addr: `שאולזון 56`
+- `tiv_taam/tiv_taam_610` [city_branch:…]
+  - branch: `יש חסד ירושלים- רמת שלמה`
+  - addr: `ברכת אברהם 22`
+- `tiv_taam/tiv_taam_78` [city_branch:…]
+  - branch: `יש הר נוף ירושלים-שאולזו`
+  - addr: `שאולזון 56`
+- `victory/victory_610` [city_branch:…]
+  - branch: `יש חסד ירושלים- רמת שלמה`
+  - addr: `ברכת אברהם 22`
+- `victory/victory_78` [city_branch:…]
+  - branch: `יש הר נוף ירושלים-שאולזו`
+  - addr: `שאולזון 56`
+- `yeinot_bitan/yeinot_bitan_3420` [city_branch:…]
+  - branch: `קרפור מרקט  אלנבי ירושלים (3420)`
+  - addr: `בית"ר פינת ינובסקי`
+- `yeinot_bitan/yeinot_bitan_610` [city_branch:…]
+  - branch: `יש חסד ירושלים- רמת שלמה`
+  - addr: `ברכת אברהם 22`
+- `yeinot_bitan/yeinot_bitan_78` [city_branch:…]
+  - branch: `יש הר נוף ירושלים-שאולזו`
+  - addr: `שאולזון 56`
+- `yohananof/yohananof_610` [city_branch:…]
+  - branch: `יש חסד ירושלים- רמת שלמה`
+  - addr: `ברכת אברהם 22`
+- `yohananof/yohananof_78` [city_branch:…]
+  - branch: `יש הר נוף ירושלים-שאולזו`
+  - addr: `שאולזון 56`
+
+### רמת גן — 21 rows
+
+- `hazi_hinam/hazi_hinam_4420` [city_branch:…]
+  - branch: `קרפור מרקט  אואזיס רמת גן  (4420) (4420)`
+  - addr: `87 הרצל`
+- `hazi_hinam/hazi_hinam_493` [city_branch:…]
+  - branch: `קרפור הרואה רמת גן`
+  - addr: `2 הרוא"ה`
+- `hazi_hinam/hazi_hinam_731` [city_branch:…]
+  - branch: `ביאליק רמת גן`
+  - addr: `ביאליק 79`
+- `hazi_hinam/hazi_hinam_768` [city_branch:…] _(no-coords)_
+  - branch: `אקספרס קרניצי רמת גן`
+- `mahsani_hashuk/mahsani_hashuk_731` [city_branch:…]
+  - branch: `ביאליק רמת גן`
+  - addr: `ביאליק 79`
+- `osher_ad/osher_ad_731` [city_branch:…]
+  - branch: `ביאליק רמת גן`
+  - addr: `ביאליק 79`
+- `osher_ad/osher_ad_768` [city_branch:…] _(no-coords)_
+  - branch: `אקספרס קרניצי רמת גן`
+- `rami_levy/rami_levy_016` [city_branch:…]
+  - branch: `רמת גן  איילון`
+  - addr: `מבצע קדש 68`
+- `rami_levy/rami_levy_731` [city_branch:…]
+  - branch: `ביאליק רמת גן`
+  - addr: `ביאליק 79`
+- `rami_levy/rami_levy_768` [city_branch:…] _(no-coords)_
+  - branch: `אקספרס קרניצי רמת גן`
+- `shufersal/shufersal_768` [city_branch:…] _(no-coords)_
+  - branch: `אקספרס קרניצי רמת גן`
+- `tiv_taam/tiv_taam_731` [city_branch:…]
+  - branch: `ביאליק רמת גן`
+  - addr: `ביאליק 79`
+- `tiv_taam/tiv_taam_768` [city_branch:…] _(no-coords)_
+  - branch: `אקספרס קרניצי רמת גן`
+- `victory/victory_731` [city_branch:…]
+  - branch: `ביאליק רמת גן`
+  - addr: `ביאליק 79`
+- `victory/victory_768` [city_branch:…] _(no-coords)_
+  - branch: `אקספרס קרניצי רמת גן`
+- `yeinot_bitan/yeinot_bitan_4420` [city_branch:…]
+  - branch: `קרפור מרקט  אואזיס רמת גן  (4420) (4420)`
+  - addr: `87 הרצל`
+- `yeinot_bitan/yeinot_bitan_493` [city_branch:…]
+  - branch: `קרפור הרואה רמת גן`
+  - addr: `2 הרוא"ה`
+- `yeinot_bitan/yeinot_bitan_731` [city_branch:…]
+  - branch: `ביאליק רמת גן`
+  - addr: `ביאליק 79`
+- `yeinot_bitan/yeinot_bitan_768` [city_branch:…] _(no-coords)_
+  - branch: `אקספרס קרניצי רמת גן`
+- `yohananof/yohananof_731` [city_branch:…]
+  - branch: `ביאליק רמת גן`
+  - addr: `ביאליק 79`
+- `yohananof/yohananof_768` [city_branch:…] _(no-coords)_
+  - branch: `אקספרס קרניצי רמת גן`
+
+### חדרה — 17 rows
+
+- `hazi_hinam/hazi_hinam_2470` [city_branch:…]
+  - branch: `קרפור מרקט  נאות חן חדרה (2470)`
+  - addr: `הלל יפה 5 פינת סמילנסקי`
+- `hazi_hinam/hazi_hinam_3020` [city_address:…]
+  - branch: `קרפור מרקט בית אליעזר (3020)`
+  - addr: `חדרה`
+- `hazi_hinam/hazi_hinam_717` [city_branch:…]
+  - branch: `הנשיא חדרה`
+  - addr: `הנשיא 2`
+- `mahsani_hashuk/mahsani_hashuk_036` [city_branch:…] _(no-coords)_
+  - branch: `חדרה צפוני`
+- `mahsani_hashuk/mahsani_hashuk_118` [city_branch:…]
+  - branch: `קרפור חדרה דוד אלעזר`
+  - addr: `חדרה דוד אלעזר 27`
+- `mahsani_hashuk/mahsani_hashuk_716` [city_branch:…]
+  - branch: `הרצל חדרה`
+  - addr: `הרצל 27`
+- `mahsani_hashuk/mahsani_hashuk_717` [city_branch:…]
+  - branch: `הנשיא חדרה`
+  - addr: `הנשיא 2`
+- `osher_ad/osher_ad_717` [city_branch:…]
+  - branch: `הנשיא חדרה`
+  - addr: `הנשיא 2`
+- `rami_levy/rami_levy_044` [city_branch:…]
+  - branch: `חדרה`
+  - addr: `השלום 1`
+- `rami_levy/rami_levy_058` [city_branch:…]
+  - branch: `חדרה ויוה`
+  - addr: `תרנ"א 20`
+- `rami_levy/rami_levy_717` [city_branch:…]
+  - branch: `הנשיא חדרה`
+  - addr: `הנשיא 2`
+- `tiv_taam/tiv_taam_717` [city_branch:…]
+  - branch: `הנשיא חדרה`
+  - addr: `הנשיא 2`
+- `victory/victory_717` [city_branch:…]
+  - branch: `הנשיא חדרה`
+  - addr: `הנשיא 2`
+- `yeinot_bitan/yeinot_bitan_2470` [city_branch:…]
+  - branch: `קרפור מרקט  נאות חן חדרה (2470)`
+  - addr: `הלל יפה 5 פינת סמילנסקי`
+- `yeinot_bitan/yeinot_bitan_3020` [city_address:…]
+  - branch: `קרפור מרקט בית אליעזר (3020)`
+  - addr: `חדרה`
+- `yeinot_bitan/yeinot_bitan_717` [city_branch:…]
+  - branch: `הנשיא חדרה`
+  - addr: `הנשיא 2`
+- `yohananof/yohananof_717` [city_branch:…]
+  - branch: `הנשיא חדרה`
+  - addr: `הנשיא 2`
+
+### אשקלון — 17 rows
+
+- `hazi_hinam/hazi_hinam_3210` [city_branch:…]
+  - branch: `קרפור סיטי לב אשקלון (3210)`
+  - addr: `שכונת שמשון`
+- `hazi_hinam/hazi_hinam_3740` [city_branch:…]
+  - branch: `קרפור מרקט  אפרידר אשקלון (3740)`
+  - addr: `5 שדרות ירושלים`
+- `hazi_hinam/hazi_hinam_710` [city_branch:…]
+  - branch: `אלי כהן אשקלון`
+  - addr: `אלי כהן 43`
+- `mahsani_hashuk/mahsani_hashuk_034` [city_branch:…]
+  - branch: `מבקיעים אשקלון`
+  - addr: `מתחם גלובוס סנטר, מבקיעים`
+- `mahsani_hashuk/mahsani_hashuk_041` [city_branch:…] _(no-coords)_
+  - branch: `אשקלון ברנע`
+- `mahsani_hashuk/mahsani_hashuk_065` [city_branch:…]
+  - branch: `קרפור מרקט אשקלון`
+  - addr: `קיבוץ גלויות 5`
+- `mahsani_hashuk/mahsani_hashuk_710` [city_branch:…]
+  - branch: `אלי כהן אשקלון`
+  - addr: `אלי כהן 43`
+- `osher_ad/osher_ad_710` [city_branch:…]
+  - branch: `אלי כהן אשקלון`
+  - addr: `אלי כהן 43`
+- `rami_levy/rami_levy_035` [city_branch:…]
+  - branch: `אשקלון`
+  - addr: `המתכנן 8`
+- `rami_levy/rami_levy_056` [city_branch:…]
+  - branch: `אשקלון צפון`
+  - addr: `צהל 99`
+- `rami_levy/rami_levy_710` [city_branch:…]
+  - branch: `אלי כהן אשקלון`
+  - addr: `אלי כהן 43`
+- `tiv_taam/tiv_taam_710` [city_branch:…]
+  - branch: `אלי כהן אשקלון`
+  - addr: `אלי כהן 43`
+- `victory/victory_710` [city_branch:…]
+  - branch: `אלי כהן אשקלון`
+  - addr: `אלי כהן 43`
+- `yeinot_bitan/yeinot_bitan_3210` [city_branch:…]
+  - branch: `קרפור סיטי לב אשקלון (3210)`
+  - addr: `שכונת שמשון`
+- `yeinot_bitan/yeinot_bitan_3740` [city_branch:…]
+  - branch: `קרפור מרקט  אפרידר אשקלון (3740)`
+  - addr: `5 שדרות ירושלים`
+- `yeinot_bitan/yeinot_bitan_710` [city_branch:…]
+  - branch: `אלי כהן אשקלון`
+  - addr: `אלי כהן 43`
+- `yohananof/yohananof_710` [city_branch:…]
+  - branch: `אלי כהן אשקלון`
+  - addr: `אלי כהן 43`
+
+### רעננה — 16 rows
+
+- `hazi_hinam/hazi_hinam_732` [city_branch:…]
+  - branch: `אחוזה רעננה`
+  - addr: `אחוזה 83`
+- `hazi_hinam/hazi_hinam_820` [city_branch:…]
+  - branch: `קרפור מרכז רעננה`
+  - addr: `114 אחוזה`
+- `hazi_hinam/hazi_hinam_830` [city_branch:…]
+  - branch: `קרפור גולן רעננה`
+  - addr: `אחוזה 198`
+- `hazi_hinam/hazi_hinam_870` [city_branch:…]
+  - branch: `קרפור סיטי  ותיקים רעננה`
+  - addr: `11 ההסתדרות`
+- `mahsani_hashuk/mahsani_hashuk_053` [city_branch:…]
+  - branch: `רעננה`
+  - addr: `נווה זמר`
+- `mahsani_hashuk/mahsani_hashuk_732` [city_branch:…]
+  - branch: `אחוזה רעננה`
+  - addr: `אחוזה 83`
+- `osher_ad/osher_ad_732` [city_branch:…]
+  - branch: `אחוזה רעננה`
+  - addr: `אחוזה 83`
+- `rami_levy/rami_levy_046` [city_branch:…] _(no-coords)_
+  - branch: `רעננה`
+- `rami_levy/rami_levy_732` [city_branch:…]
+  - branch: `אחוזה רעננה`
+  - addr: `אחוזה 83`
+- `tiv_taam/tiv_taam_732` [city_branch:…]
+  - branch: `אחוזה רעננה`
+  - addr: `אחוזה 83`
+- `victory/victory_732` [city_branch:…]
+  - branch: `אחוזה רעננה`
+  - addr: `אחוזה 83`
+- `yeinot_bitan/yeinot_bitan_732` [city_branch:…]
+  - branch: `אחוזה רעננה`
+  - addr: `אחוזה 83`
+- `yeinot_bitan/yeinot_bitan_820` [city_branch:…]
+  - branch: `קרפור מרכז רעננה`
+  - addr: `114 אחוזה`
+- `yeinot_bitan/yeinot_bitan_830` [city_branch:…]
+  - branch: `קרפור גולן רעננה`
+  - addr: `אחוזה 198`
+- `yeinot_bitan/yeinot_bitan_870` [city_branch:…]
+  - branch: `קרפור סיטי  ותיקים רעננה`
+  - addr: `11 ההסתדרות`
+- `yohananof/yohananof_732` [city_branch:…]
+  - branch: `אחוזה רעננה`
+  - addr: `אחוזה 83`
+
+### כפר סבא — 14 rows
+
+- `hazi_hinam/hazi_hinam_5204` [city_branch:…]
+  - branch: `כפר סבא @ קוויק`
+  - addr: `https://www.quik.co.il`
+- `hazi_hinam/hazi_hinam_5304` [city_branch:…]
+  - branch: `קרפור אונליין   כפר סבא @ קרפור (5304)`
+  - addr: `https://www.carrefour.co.il`
+- `hazi_hinam/hazi_hinam_719` [city_branch:…]
+  - branch: `רוטשילד כפר סבא`
+  - addr: `רוטשילד 39`
+- `mahsani_hashuk/mahsani_hashuk_024` [city_branch:…] _(no-coords)_
+  - branch: `כפר סבא`
+- `mahsani_hashuk/mahsani_hashuk_400` [city_branch:…]
+  - branch: `קרפור סיטי  קניון כפר סבא (1030)`
+  - addr: `20 כצנלסון`
+- `mahsani_hashuk/mahsani_hashuk_719` [city_branch:…]
+  - branch: `רוטשילד כפר סבא`
+  - addr: `רוטשילד 39`
+- `osher_ad/osher_ad_719` [city_branch:…]
+  - branch: `רוטשילד כפר סבא`
+  - addr: `רוטשילד 39`
+- `rami_levy/rami_levy_719` [city_branch:…]
+  - branch: `רוטשילד כפר סבא`
+  - addr: `רוטשילד 39`
+- `tiv_taam/tiv_taam_719` [city_branch:…]
+  - branch: `רוטשילד כפר סבא`
+  - addr: `רוטשילד 39`
+- `victory/victory_719` [city_branch:…]
+  - branch: `רוטשילד כפר סבא`
+  - addr: `רוטשילד 39`
+- `yeinot_bitan/yeinot_bitan_5204` [city_branch:…]
+  - branch: `כפר סבא @ קוויק`
+  - addr: `https://www.quik.co.il`
+- `yeinot_bitan/yeinot_bitan_5304` [city_branch:…]
+  - branch: `קרפור אונליין   כפר סבא @ קרפור (5304)`
+  - addr: `https://www.carrefour.co.il`
+- `yeinot_bitan/yeinot_bitan_719` [city_branch:…]
+  - branch: `רוטשילד כפר סבא`
+  - addr: `רוטשילד 39`
+- `yohananof/yohananof_719` [city_branch:…]
+  - branch: `רוטשילד כפר סבא`
+  - addr: `רוטשילד 39`
+
+### נתיבות — 12 rows
+
+- `hazi_hinam/hazi_hinam_145` [city_branch:…] _(no-coords)_
+  - branch: `BE נתיבות`
+- `mahsani_hashuk/mahsani_hashuk_009` [city_branch:…]
+  - branch: `נתיבות`
+  - addr: `רחוב בעלי המלאכה 2, א.התעשיה`
+- `mahsani_hashuk/mahsani_hashuk_055` [city_branch:…] _(no-coords)_
+  - branch: `נתיבות מנהטן`
+- `mahsani_hashuk/mahsani_hashuk_127` [city_branch:…]
+  - branch: `היפר נתיבות מרכז`
+  - addr: `בעלי המלאכה 3 , נתיבות`
+- `osher_ad/osher_ad_145` [city_branch:…] _(no-coords)_
+  - branch: `BE נתיבות`
+- `rami_levy/rami_levy_031` [city_branch:…]
+  - branch: `נתיבות`
+  - addr: `צומת בית הגדי`
+- `rami_levy/rami_levy_145` [city_branch:…] _(no-coords)_
+  - branch: `BE נתיבות`
+- `shufersal/shufersal_145` [city_branch:…] _(no-coords)_
+  - branch: `BE נתיבות`
+- `tiv_taam/tiv_taam_145` [city_branch:…] _(no-coords)_
+  - branch: `BE נתיבות`
+- `victory/victory_145` [city_branch:…] _(no-coords)_
+  - branch: `BE נתיבות`
+- `yeinot_bitan/yeinot_bitan_145` [city_branch:…] _(no-coords)_
+  - branch: `BE נתיבות`
+- `yohananof/yohananof_145` [city_branch:…] _(no-coords)_
+  - branch: `BE נתיבות`
+
+### הוד השרון — 12 rows
+
+- `hazi_hinam/hazi_hinam_206` [city_address:…]
+  - branch: `כל בו חצי חינם שרונים`
+  - addr: `הרקון 2 הוד השרון`
+- `hazi_hinam/hazi_hinam_476` [city_branch:…]
+  - branch: `BE הוד השרון כיכר המושבה`
+  - addr: `שמיר`
+- `mahsani_hashuk/mahsani_hashuk_206` [city_address:…]
+  - branch: `כל בו חצי חינם שרונים`
+  - addr: `הרקון 2 הוד השרון`
+- `mahsani_hashuk/mahsani_hashuk_210` [city_address:…]
+  - branch: `תוצרת חקלאית ירקות שרונים`
+  - addr: `הרקון 2 , הוד השרון , ישראל`
+- `mahsani_hashuk/mahsani_hashuk_714` [city_branch:…]
+  - branch: `מגדיאל הוד השרון`
+  - addr: `מגדיאל 57`
+- `osher_ad/osher_ad_476` [city_branch:…]
+  - branch: `BE הוד השרון כיכר המושבה`
+  - addr: `שמיר`
+- `rami_levy/rami_levy_476` [city_branch:…]
+  - branch: `BE הוד השרון כיכר המושבה`
+  - addr: `שמיר`
+- `shufersal/shufersal_476` [city_branch:…]
+  - branch: `BE הוד השרון כיכר המושבה`
+  - addr: `שמיר`
+- `tiv_taam/tiv_taam_476` [city_branch:…]
+  - branch: `BE הוד השרון כיכר המושבה`
+  - addr: `שמיר`
+- `victory/victory_476` [city_branch:…]
+  - branch: `BE הוד השרון כיכר המושבה`
+  - addr: `שמיר`
+- `yeinot_bitan/yeinot_bitan_476` [city_branch:…]
+  - branch: `BE הוד השרון כיכר המושבה`
+  - addr: `שמיר`
+- `yohananof/yohananof_476` [city_branch:…]
+  - branch: `BE הוד השרון כיכר המושבה`
+  - addr: `שמיר`
+
+### בית שמש — 12 rows
+
+- `hazi_hinam/hazi_hinam_3680` [city_branch:…]
+  - branch: `קרפור מרקט בית שמש (3680)`
+  - addr: `נחל השורק 23`
+- `hazi_hinam/hazi_hinam_704` [city_branch:…]
+  - branch: `בית הפירות בית שמש`
+  - addr: `מרכז מסחרי נוימן`
+- `mahsani_hashuk/mahsani_hashuk_123` [city_branch:…]
+  - branch: `מרקט בית שמש האמוראי`
+  - addr: `שד' האמרואים 28`
+- `mahsani_hashuk/mahsani_hashuk_704` [city_branch:…]
+  - branch: `בית הפירות בית שמש`
+  - addr: `מרכז מסחרי נוימן`
+- `osher_ad/osher_ad_704` [city_branch:…]
+  - branch: `בית הפירות בית שמש`
+  - addr: `מרכז מסחרי נוימן`
+- `rami_levy/rami_levy_071` [city_branch:…]
+  - branch: `רמת בית שמש`
+  - addr: `שדרות נהר הירקון 38`
+- `rami_levy/rami_levy_704` [city_branch:…]
+  - branch: `בית הפירות בית שמש`
+  - addr: `מרכז מסחרי נוימן`
+- `tiv_taam/tiv_taam_704` [city_branch:…]
+  - branch: `בית הפירות בית שמש`
+  - addr: `מרכז מסחרי נוימן`
+- `victory/victory_704` [city_branch:…]
+  - branch: `בית הפירות בית שמש`
+  - addr: `מרכז מסחרי נוימן`
+- `yeinot_bitan/yeinot_bitan_3680` [city_branch:…]
+  - branch: `קרפור מרקט בית שמש (3680)`
+  - addr: `נחל השורק 23`
+- `yeinot_bitan/yeinot_bitan_704` [city_branch:…]
+  - branch: `בית הפירות בית שמש`
+  - addr: `מרכז מסחרי נוימן`
+- `yohananof/yohananof_704` [city_branch:…]
+  - branch: `בית הפירות בית שמש`
+  - addr: `מרכז מסחרי נוימן`
+
+### ראשון לציון — 12 rows
+
+- `hazi_hinam/hazi_hinam_730` [city_branch:…]
+  - branch: `רוטשילד ראשון לציון`
+  - addr: `רוטשילד 45`
+- `mahsani_hashuk/mahsani_hashuk_201` [city_address:…]
+  - branch: `כל בו חצי חינם הכשרת הישוב`
+  - addr: `הכשרת הישוב 3 , ראשון לציון , ישראל`
+- `mahsani_hashuk/mahsani_hashuk_207` [city_address:…]
+  - branch: `תוצרת חקלאית ירקות לחי`
+  - addr: `לחי 16 , ראשון לציון , ישראל`
+- `mahsani_hashuk/mahsani_hashuk_208` [city_address:…]
+  - branch: `תוצרת חקלאית שוק ראשון`
+  - addr: `משה לוי 8 , ראשון לציון , ישראל`
+- `mahsani_hashuk/mahsani_hashuk_219` [city_address:…]
+  - branch: `תוצרת חקלאית ירקות הכשרת הישוב`
+  - addr: `הכשרת הישוב 3 , ראשון לציון , ישראל`
+- `mahsani_hashuk/mahsani_hashuk_730` [city_branch:…]
+  - branch: `רוטשילד ראשון לציון`
+  - addr: `רוטשילד 45`
+- `osher_ad/osher_ad_730` [city_branch:…]
+  - branch: `רוטשילד ראשון לציון`
+  - addr: `רוטשילד 45`
+- `rami_levy/rami_levy_730` [city_branch:…]
+  - branch: `רוטשילד ראשון לציון`
+  - addr: `רוטשילד 45`
+- `tiv_taam/tiv_taam_730` [city_branch:…]
+  - branch: `רוטשילד ראשון לציון`
+  - addr: `רוטשילד 45`
+- `victory/victory_730` [city_branch:…]
+  - branch: `רוטשילד ראשון לציון`
+  - addr: `רוטשילד 45`
+- `yeinot_bitan/yeinot_bitan_730` [city_branch:…]
+  - branch: `רוטשילד ראשון לציון`
+  - addr: `רוטשילד 45`
+- `yohananof/yohananof_730` [city_branch:…]
+  - branch: `רוטשילד ראשון לציון`
+  - addr: `רוטשילד 45`
+
+### קרית שמונה — 11 rows
+
+- `hazi_hinam/hazi_hinam_250` [city_branch:…] _(no-coords)_
+  - branch: `קריית שמונה`
+- `mahsani_hashuk/mahsani_hashuk_039` [city_branch:…]
+  - branch: `קרית שמונה`
+  - addr: `שדרות תל חי 93`
+- `mahsani_hashuk/mahsani_hashuk_129` [city_branch:…]
+  - branch: `קרפור קרית שמונה`
+  - addr: `טשרניחובסקי 4, קרית שמונה`
+- `osher_ad/osher_ad_250` [city_branch:…] _(no-coords)_
+  - branch: `קריית שמונה`
+- `rami_levy/rami_levy_038` [city_branch:…]
+  - branch: `קרית שמונה`
+  - addr: `איזור תעשיה צפוני קרית שמונה`
+- `rami_levy/rami_levy_250` [city_branch:…] _(no-coords)_
+  - branch: `קריית שמונה`
+- `shufersal/shufersal_250` [city_branch:…] _(no-coords)_
+  - branch: `קריית שמונה`
+- `tiv_taam/tiv_taam_250` [city_branch:…] _(no-coords)_
+  - branch: `קריית שמונה`
+- `victory/victory_250` [city_branch:…] _(no-coords)_
+  - branch: `קריית שמונה`
+- `yeinot_bitan/yeinot_bitan_250` [city_branch:…] _(no-coords)_
+  - branch: `קריית שמונה`
+- `yohananof/yohananof_250` [city_branch:…] _(no-coords)_
+  - branch: `קריית שמונה`
+
+### אופקים — 10 rows
+
+- `hazi_hinam/hazi_hinam_120` [city_branch:…]
+  - branch: `היפר אופקים`
+  - addr: `אופקים`
+- `hazi_hinam/hazi_hinam_789` [city_branch:…] _(no-coords)_
+  - branch: `גוד מרקט אופקים`
+- `osher_ad/osher_ad_789` [city_branch:…] _(no-coords)_
+  - branch: `גוד מרקט אופקים`
+- `rami_levy/rami_levy_789` [city_branch:…] _(no-coords)_
+  - branch: `גוד מרקט אופקים`
+- `shufersal/shufersal_789` [city_branch:…] _(no-coords)_
+  - branch: `גוד מרקט אופקים`
+- `tiv_taam/tiv_taam_789` [city_branch:…] _(no-coords)_
+  - branch: `גוד מרקט אופקים`
+- `victory/victory_789` [city_branch:…] _(no-coords)_
+  - branch: `גוד מרקט אופקים`
+- `yeinot_bitan/yeinot_bitan_120` [city_branch:…]
+  - branch: `היפר אופקים`
+  - addr: `אופקים`
+- `yeinot_bitan/yeinot_bitan_789` [city_branch:…] _(no-coords)_
+  - branch: `גוד מרקט אופקים`
+- `yohananof/yohananof_789` [city_branch:…] _(no-coords)_
+  - branch: `גוד מרקט אופקים`
+
+### אילת — 10 rows
+
+- `hazi_hinam/hazi_hinam_1252` [city_branch:…]
+  - branch: `קרפור מעלה אילת (1252)`
+  - addr: `דרך יותם פינת רח ארגמן`
+- `hazi_hinam/hazi_hinam_208` [city_branch:…]
+  - branch: `דיל אילת נחל אורה`
+  - addr: `ירושלים השלמה 52`
+- `osher_ad/osher_ad_208` [city_branch:…]
+  - branch: `דיל אילת נחל אורה`
+  - addr: `ירושלים השלמה 52`
+- `rami_levy/rami_levy_208` [city_branch:…]
+  - branch: `דיל אילת נחל אורה`
+  - addr: `ירושלים השלמה 52`
+- `shufersal/shufersal_208` [city_branch:…]
+  - branch: `דיל אילת נחל אורה`
+  - addr: `ירושלים השלמה 52`
+- `tiv_taam/tiv_taam_208` [city_branch:…]
+  - branch: `דיל אילת נחל אורה`
+  - addr: `ירושלים השלמה 52`
+- `victory/victory_208` [city_branch:…]
+  - branch: `דיל אילת נחל אורה`
+  - addr: `ירושלים השלמה 52`
+- `yeinot_bitan/yeinot_bitan_1252` [city_branch:…]
+  - branch: `קרפור מעלה אילת (1252)`
+  - addr: `דרך יותם פינת רח ארגמן`
+- `yeinot_bitan/yeinot_bitan_208` [city_branch:…]
+  - branch: `דיל אילת נחל אורה`
+  - addr: `ירושלים השלמה 52`
+- `yohananof/yohananof_208` [city_branch:…]
+  - branch: `דיל אילת נחל אורה`
+  - addr: `ירושלים השלמה 52`
+
+### חולון — 10 rows
+
+- `hazi_hinam/hazi_hinam_191` [city_branch:…]
+  - branch: `בעיר ויצמן חולון`
+  - addr: `48 סוקולוב`
+- `hazi_hinam/hazi_hinam_202` [city_address:…]
+  - branch: `כל בו חצי חינם כישור`
+  - addr: `כישור 22, חולון, ישראל`
+- `hazi_hinam/hazi_hinam_204` [city_address:…]
+  - branch: `כל בו חצי חינם מרכבה`
+  - addr: `המרכבה 31, חולון, ישראל`
+- `hazi_hinam/hazi_hinam_217` [city_address:…]
+  - branch: `תוצרת חקלאית מרכבה ירקות`
+  - addr: `המרכבה 31, חולון, ישראל`
+- `mahsani_hashuk/mahsani_hashuk_067` [city_branch:…]
+  - branch: `קרפור סיטי  חולון בסיטי`
+  - addr: `המרגנית 2`
+- `mahsani_hashuk/mahsani_hashuk_202` [city_address:…]
+  - branch: `כל בו חצי חינם כישור`
+  - addr: `כישור 22, חולון, ישראל`
+- `mahsani_hashuk/mahsani_hashuk_204` [city_address:…]
+  - branch: `כל בו חצי חינם מרכבה`
+  - addr: `המרכבה 31, חולון, ישראל`
+- `mahsani_hashuk/mahsani_hashuk_217` [city_address:…]
+  - branch: `תוצרת חקלאית מרכבה ירקות`
+  - addr: `המרכבה 31, חולון, ישראל`
+- `rami_levy/rami_levy_050` [city_branch:…]
+  - branch: `חולון`
+  - addr: `תמנע 6`
+- `yeinot_bitan/yeinot_bitan_191` [city_branch:…]
+  - branch: `בעיר ויצמן חולון`
+  - addr: `48 סוקולוב`
+
+### רמלה — 10 rows
+
+- `hazi_hinam/hazi_hinam_482` [city_branch:…] _(no-coords)_
+  - branch: `BE רמלה נווה דורון`
+- `mahsani_hashuk/mahsani_hashuk_012` [city_branch:…]
+  - branch: `רמלה`
+  - addr: `שדרות ירושלים פינת נופי חמד`
+- `osher_ad/osher_ad_482` [city_branch:…] _(no-coords)_
+  - branch: `BE רמלה נווה דורון`
+- `rami_levy/rami_levy_059` [city_branch:…]
+  - branch: `רמלה`
+  - addr: `שדרות הרצל 91`
+- `rami_levy/rami_levy_482` [city_branch:…] _(no-coords)_
+  - branch: `BE רמלה נווה דורון`
+- `shufersal/shufersal_482` [city_branch:…] _(no-coords)_
+  - branch: `BE רמלה נווה דורון`
+- `tiv_taam/tiv_taam_482` [city_branch:…] _(no-coords)_
+  - branch: `BE רמלה נווה דורון`
+- `victory/victory_482` [city_branch:…] _(no-coords)_
+  - branch: `BE רמלה נווה דורון`
+- `yeinot_bitan/yeinot_bitan_482` [city_branch:…] _(no-coords)_
+  - branch: `BE רמלה נווה דורון`
+- `yohananof/yohananof_482` [city_branch:…] _(no-coords)_
+  - branch: `BE רמלה נווה דורון`
+
+### אור יהודה — 10 rows
+
+- `hazi_hinam/hazi_hinam_708` [city_branch:…]
+  - branch: `עזריאלי אור יהודה`
+  - addr: `קניון עזריאלי אור יהודה מינוס 1`
+- `mahsani_hashuk/mahsani_hashuk_015` [city_branch:…]
+  - branch: `אור יהודה`
+  - addr: `רחוב הפלדה 1`
+- `mahsani_hashuk/mahsani_hashuk_019` [city_branch:…]
+  - branch: `אור יהודה גדול`
+  - addr: `אור יהודה`
+- `mahsani_hashuk/mahsani_hashuk_708` [city_branch:…]
+  - branch: `עזריאלי אור יהודה`
+  - addr: `קניון עזריאלי אור יהודה מינוס 1`
+- `osher_ad/osher_ad_708` [city_branch:…]
+  - branch: `עזריאלי אור יהודה`
+  - addr: `קניון עזריאלי אור יהודה מינוס 1`
+- `rami_levy/rami_levy_708` [city_branch:…]
+  - branch: `עזריאלי אור יהודה`
+  - addr: `קניון עזריאלי אור יהודה מינוס 1`
+- `tiv_taam/tiv_taam_708` [city_branch:…]
+  - branch: `עזריאלי אור יהודה`
+  - addr: `קניון עזריאלי אור יהודה מינוס 1`
+- `victory/victory_708` [city_branch:…]
+  - branch: `עזריאלי אור יהודה`
+  - addr: `קניון עזריאלי אור יהודה מינוס 1`
+- `yeinot_bitan/yeinot_bitan_708` [city_branch:…]
+  - branch: `עזריאלי אור יהודה`
+  - addr: `קניון עזריאלי אור יהודה מינוס 1`
+- `yohananof/yohananof_708` [city_branch:…]
+  - branch: `עזריאלי אור יהודה`
+  - addr: `קניון עזריאלי אור יהודה מינוס 1`
+
+### עפולה — 9 rows
+
+- `hazi_hinam/hazi_hinam_722` [city_branch:…]
+  - branch: `חטיבה תשע עפולה`
+  - addr: `חטיבה תשע 34`
+- `mahsani_hashuk/mahsani_hashuk_037` [city_branch:…]
+  - branch: `עפולה`
+  - addr: `קהילת ציון 30`
+- `mahsani_hashuk/mahsani_hashuk_722` [city_branch:…]
+  - branch: `חטיבה תשע עפולה`
+  - addr: `חטיבה תשע 34`
+- `osher_ad/osher_ad_722` [city_branch:…]
+  - branch: `חטיבה תשע עפולה`
+  - addr: `חטיבה תשע 34`
+- `rami_levy/rami_levy_722` [city_branch:…]
+  - branch: `חטיבה תשע עפולה`
+  - addr: `חטיבה תשע 34`
+- `tiv_taam/tiv_taam_722` [city_branch:…]
+  - branch: `חטיבה תשע עפולה`
+  - addr: `חטיבה תשע 34`
+- `victory/victory_722` [city_branch:…]
+  - branch: `חטיבה תשע עפולה`
+  - addr: `חטיבה תשע 34`
+- `yeinot_bitan/yeinot_bitan_722` [city_branch:…]
+  - branch: `חטיבה תשע עפולה`
+  - addr: `חטיבה תשע 34`
+- `yohananof/yohananof_722` [city_branch:…]
+  - branch: `חטיבה תשע עפולה`
+  - addr: `חטיבה תשע 34`
+
+### קרית גת — 9 rows
+
+- `hazi_hinam/hazi_hinam_786` [city_branch:…]
+  - branch: `BE קרית גת-כרמי גת`
+  - addr: `BE קרית גת-כרמי גת`
+- `osher_ad/osher_ad_786` [city_branch:…]
+  - branch: `BE קרית גת-כרמי גת`
+  - addr: `BE קרית גת-כרמי גת`
+- `rami_levy/rami_levy_054` [city_branch:…]
+  - branch: `קרית גת`
+  - addr: `דרך הדרום 3 מרכז ביג`
+- `rami_levy/rami_levy_786` [city_branch:…]
+  - branch: `BE קרית גת-כרמי גת`
+  - addr: `BE קרית גת-כרמי גת`
+- `shufersal/shufersal_786` [city_branch:…]
+  - branch: `BE קרית גת-כרמי גת`
+  - addr: `BE קרית גת-כרמי גת`
+- `tiv_taam/tiv_taam_786` [city_branch:…]
+  - branch: `BE קרית גת-כרמי גת`
+  - addr: `BE קרית גת-כרמי גת`
+- `victory/victory_786` [city_branch:…]
+  - branch: `BE קרית גת-כרמי גת`
+  - addr: `BE קרית גת-כרמי גת`
+- `yeinot_bitan/yeinot_bitan_786` [city_branch:…]
+  - branch: `BE קרית גת-כרמי גת`
+  - addr: `BE קרית גת-כרמי גת`
+- `yohananof/yohananof_786` [city_branch:…]
+  - branch: `BE קרית גת-כרמי גת`
+  - addr: `BE קרית גת-כרמי גת`
+
+### אריאל — 9 rows
+
+- `hazi_hinam/hazi_hinam_787` [city_branch:…] _(no-coords)_
+  - branch: `BE אריאל`
+- `osher_ad/osher_ad_787` [city_branch:…] _(no-coords)_
+  - branch: `BE אריאל`
+- `rami_levy/rami_levy_053` [city_branch:…]
+  - branch: `אריאל`
+  - addr: `הבנאי 6`
+- `rami_levy/rami_levy_787` [city_branch:…] _(no-coords)_
+  - branch: `BE אריאל`
+- `shufersal/shufersal_787` [city_branch:…] _(no-coords)_
+  - branch: `BE אריאל`
+- `tiv_taam/tiv_taam_787` [city_branch:…] _(no-coords)_
+  - branch: `BE אריאל`
+- `victory/victory_787` [city_branch:…] _(no-coords)_
+  - branch: `BE אריאל`
+- `yeinot_bitan/yeinot_bitan_787` [city_branch:…] _(no-coords)_
+  - branch: `BE אריאל`
+- `yohananof/yohananof_787` [city_branch:…] _(no-coords)_
+  - branch: `BE אריאל`
+
+### פרדסיה — 8 rows
+
+- `hazi_hinam/hazi_hinam_723` [city_branch:…]
+  - branch: `הארז פרדסיה`
+  - addr: `הארז 32`
+- `mahsani_hashuk/mahsani_hashuk_723` [city_branch:…]
+  - branch: `הארז פרדסיה`
+  - addr: `הארז 32`
+- `osher_ad/osher_ad_723` [city_branch:…]
+  - branch: `הארז פרדסיה`
+  - addr: `הארז 32`
+- `rami_levy/rami_levy_723` [city_branch:…]
+  - branch: `הארז פרדסיה`
+  - addr: `הארז 32`
+- `tiv_taam/tiv_taam_723` [city_branch:…]
+  - branch: `הארז פרדסיה`
+  - addr: `הארז 32`
+- `victory/victory_723` [city_branch:…]
+  - branch: `הארז פרדסיה`
+  - addr: `הארז 32`
+- `yeinot_bitan/yeinot_bitan_723` [city_branch:…]
+  - branch: `הארז פרדסיה`
+  - addr: `הארז 32`
+- `yohananof/yohananof_723` [city_branch:…]
+  - branch: `הארז פרדסיה`
+  - addr: `הארז 32`
+
+### קרית ביאליק — 8 rows
+
+- `hazi_hinam/hazi_hinam_727` [city_branch:…]
+  - branch: `קיריון קרית ביאליק`
+  - addr: `דרך עכו 192`
+- `mahsani_hashuk/mahsani_hashuk_727` [city_branch:…]
+  - branch: `קיריון קרית ביאליק`
+  - addr: `דרך עכו 192`
+- `osher_ad/osher_ad_727` [city_branch:…]
+  - branch: `קיריון קרית ביאליק`
+  - addr: `דרך עכו 192`
+- `rami_levy/rami_levy_727` [city_branch:…]
+  - branch: `קיריון קרית ביאליק`
+  - addr: `דרך עכו 192`
+- `tiv_taam/tiv_taam_727` [city_branch:…]
+  - branch: `קיריון קרית ביאליק`
+  - addr: `דרך עכו 192`
+- `victory/victory_727` [city_branch:…]
+  - branch: `קיריון קרית ביאליק`
+  - addr: `דרך עכו 192`
+- `yeinot_bitan/yeinot_bitan_727` [city_branch:…]
+  - branch: `קיריון קרית ביאליק`
+  - addr: `דרך עכו 192`
+- `yohananof/yohananof_727` [city_branch:…]
+  - branch: `קיריון קרית ביאליק`
+  - addr: `דרך עכו 192`
+
+### ראש העין — 8 rows
+
+- `hazi_hinam/hazi_hinam_728` [city_branch:…]
+  - branch: `שבזי ראש העין`
+  - addr: `שבזי 12`
+- `mahsani_hashuk/mahsani_hashuk_728` [city_branch:…]
+  - branch: `שבזי ראש העין`
+  - addr: `שבזי 12`
+- `osher_ad/osher_ad_728` [city_branch:…]
+  - branch: `שבזי ראש העין`
+  - addr: `שבזי 12`
+- `rami_levy/rami_levy_728` [city_branch:…]
+  - branch: `שבזי ראש העין`
+  - addr: `שבזי 12`
+- `tiv_taam/tiv_taam_728` [city_branch:…]
+  - branch: `שבזי ראש העין`
+  - addr: `שבזי 12`
+- `victory/victory_728` [city_branch:…]
+  - branch: `שבזי ראש העין`
+  - addr: `שבזי 12`
+- `yeinot_bitan/yeinot_bitan_728` [city_branch:…]
+  - branch: `שבזי ראש העין`
+  - addr: `שבזי 12`
+- `yohananof/yohananof_728` [city_branch:…]
+  - branch: `שבזי ראש העין`
+  - addr: `שבזי 12`
+
+### אפרת — 8 rows
+
+- `hazi_hinam/hazi_hinam_788` [city_branch:…] _(no-coords)_
+  - branch: `BE אפרת`
+- `osher_ad/osher_ad_788` [city_branch:…] _(no-coords)_
+  - branch: `BE אפרת`
+- `rami_levy/rami_levy_788` [city_branch:…] _(no-coords)_
+  - branch: `BE אפרת`
+- `shufersal/shufersal_788` [city_branch:…] _(no-coords)_
+  - branch: `BE אפרת`
+- `tiv_taam/tiv_taam_788` [city_branch:…] _(no-coords)_
+  - branch: `BE אפרת`
+- `victory/victory_788` [city_branch:…] _(no-coords)_
+  - branch: `BE אפרת`
+- `yeinot_bitan/yeinot_bitan_788` [city_branch:…] _(no-coords)_
+  - branch: `BE אפרת`
+- `yohananof/yohananof_788` [city_branch:…] _(no-coords)_
+  - branch: `BE אפרת`
+
+### מודיעין — 7 rows
+
+- `hazi_hinam/hazi_hinam_2540` [city_branch:…]
+  - branch: `קרפור מרקט  מודיעין שמשוני (2540)`
+  - addr: `עמק בית שאן פינת יחזקאל הנביא`
+- `mahsani_hashuk/mahsani_hashuk_018` [city_branch:…] _(no-coords)_
+  - branch: `מודיעין כרמים`
+- `mahsani_hashuk/mahsani_hashuk_062` [city_branch:…]
+  - branch: `קרפור סיטי  מודיעין בסיטי`
+  - addr: `עמק החולה 76`
+- `rami_levy/rami_levy_010` [city_branch:…]
+  - branch: `מודיעין חדש`
+  - addr: `א.ת שילת`
+- `rami_levy/rami_levy_025` [city_branch:…]
+  - branch: `מודעין ישפרו`
+  - addr: `החרט 1 מרכז עינב ישפרו`
+- `yeinot_bitan/yeinot_bitan_2540` [city_branch:…]
+  - branch: `קרפור מרקט  מודיעין שמשוני (2540)`
+  - addr: `עמק בית שאן פינת יחזקאל הנביא`
+- `yohananof/yohananof_018` [city_branch:…] _(no-coords)_
+  - branch: `מודיעין כרמים`
+
+### רחובות — 6 rows
+
+- `hazi_hinam/hazi_hinam_2190` [city_branch:…]
+  - branch: `קרפור סיטי  גני העיר רחובות (2190)`
+  - addr: `15 דרך ירושלים`
+- `hazi_hinam/hazi_hinam_2740` [city_branch:…]
+  - branch: `קרפור מרקט  שרונה רחובות (2740)`
+  - addr: `מדר פינת דרך ירושלים`
+- `mahsani_hashuk/mahsani_hashuk_203` [city_branch:…]
+  - branch: `כל בו חצי חינם - רחובות`
+  - addr: `דרך הים 1 , רחובות`
+- `rami_levy/rami_levy_041` [city_branch:…]
+  - branch: `רחובות`
+  - addr: `מוטי קינד 1`
+- `yeinot_bitan/yeinot_bitan_2190` [city_branch:…]
+  - branch: `קרפור סיטי  גני העיר רחובות (2190)`
+  - addr: `15 דרך ירושלים`
+- `yeinot_bitan/yeinot_bitan_2740` [city_branch:…]
+  - branch: `קרפור מרקט  שרונה רחובות (2740)`
+  - addr: `מדר פינת דרך ירושלים`
+
+### הרצליה — 6 rows
+
+- `hazi_hinam/hazi_hinam_4120` [city_branch:…]
+  - branch: `קרפור הדר הרצליה (4120)`
+  - addr: `2 הדר`
+- `hazi_hinam/hazi_hinam_4150` [city_branch:…]
+  - branch: `קרפור סיטי  הרצליה פיתוח (4150)`
+  - addr: `34 זהר טל`
+- `mahsani_hashuk/mahsani_hashuk_064` [city_branch:…]
+  - branch: `קרפור סיטי  הרצליה ליד הבית`
+  - addr: `רבי עקיבא 50`
+- `mahsani_hashuk/mahsani_hashuk_715` [city_branch:…]
+  - branch: `סוקולוב הרצליה`
+  - addr: `סוקולוב 56`
+- `yeinot_bitan/yeinot_bitan_4120` [city_branch:…]
+  - branch: `קרפור הדר הרצליה (4120)`
+  - addr: `2 הדר`
+- `yeinot_bitan/yeinot_bitan_4150` [city_branch:…]
+  - branch: `קרפור סיטי  הרצליה פיתוח (4150)`
+  - addr: `34 זהר טל`
+
+### כפר יונה — 4 rows
+
+- `hazi_hinam/hazi_hinam_2070` [city_branch:…]
+  - branch: `קרפור סיטי  כפר יונה דרום (2070)`
+  - addr: `40 מנחם בגין`
+- `hazi_hinam/hazi_hinam_3050` [city_branch:…]
+  - branch: `קרפור סיטי  כפר יונה (3050)`
+  - addr: `6 שרת`
+- `yeinot_bitan/yeinot_bitan_2070` [city_branch:…]
+  - branch: `קרפור סיטי  כפר יונה דרום (2070)`
+  - addr: `40 מנחם בגין`
+- `yeinot_bitan/yeinot_bitan_3050` [city_branch:…]
+  - branch: `קרפור סיטי  כפר יונה (3050)`
+  - addr: `6 שרת`
+
+### קיסריה — 4 rows
+
+- `hazi_hinam/hazi_hinam_523` [city_branch:…] _(no-coords)_
+  - branch: `ליקוט קיסריה`
+- `mahsani_hashuk/mahsani_hashuk_523` [city_branch:…] _(no-coords)_
+  - branch: `ליקוט קיסריה`
+- `tiv_taam/tiv_taam_523` [city_branch:…] _(no-coords)_
+  - branch: `ליקוט קיסריה`
+- `yeinot_bitan/yeinot_bitan_523` [city_branch:…] _(no-coords)_
+  - branch: `ליקוט קיסריה`
+
+### יבנה — 3 rows
+
+- `hazi_hinam/hazi_hinam_125` [city_branch:…]
+  - branch: `קרפור יבנה נאות שמיר`
+  - addr: `הרצל 19`
+- `mahsani_hashuk/mahsani_hashuk_124` [city_branch:…]
+  - branch: `מרקט יבנה דואני`
+  - addr: `דואני 42`
+- `yeinot_bitan/yeinot_bitan_125` [city_branch:…]
+  - branch: `קרפור יבנה נאות שמיר`
+  - addr: `הרצל 19`
+
+### גן יבנה — 3 rows
+
+- `hazi_hinam/hazi_hinam_2310` [city_branch:…]
+  - branch: `קרפור מרקט  גן יבנה (2310)`
+  - addr: `הרצל פ.קיבוץ גלויות`
+- `mahsani_hashuk/mahsani_hashuk_016` [city_branch:…]
+  - branch: `גן יבנה`
+  - addr: `דרך מנחם בגין פינת המגנים 57`
+- `yeinot_bitan/yeinot_bitan_2310` [city_branch:…]
+  - branch: `קרפור מרקט  גן יבנה (2310)`
+  - addr: `הרצל פ.קיבוץ גלויות`
+
+### גבעתיים — 3 rows
+
+- `hazi_hinam/hazi_hinam_2320` [city_branch:…]
+  - branch: `קרפור סיטי  קניון גבעתיים (2320)`
+  - addr: `ויצמן פינת יצחק רבין`
+- `mahsani_hashuk/mahsani_hashuk_713` [city_branch:…]
+  - branch: `בן גוריון גבעתיים`
+  - addr: `בן גוריון 182`
+- `yeinot_bitan/yeinot_bitan_2320` [city_branch:…]
+  - branch: `קרפור סיטי  קניון גבעתיים (2320)`
+  - addr: `ויצמן פינת יצחק רבין`
+
+### טבריה — 3 rows
+
+- `mahsani_hashuk/mahsani_hashuk_023` [city_branch:…] _(no-coords)_
+  - branch: `טבריה`
+- `mahsani_hashuk/mahsani_hashuk_038` [city_branch:…]
+  - branch: `טבריה תחתית`
+  - addr: `יהודה הלוי 113`
+- `rami_levy/rami_levy_014` [city_branch:…]
+  - branch: `טבריה`
+  - addr: `המברג 1`
+
+### אבן יהודה — 2 rows
+
+- `hazi_hinam/hazi_hinam_2180` [city_branch:…]
+  - branch: `קרפור סיטי  אבן יהודה (2180)`
+  - addr: `הדרים פינת המיסדים`
+- `yeinot_bitan/yeinot_bitan_2180` [city_branch:…]
+  - branch: `קרפור סיטי  אבן יהודה (2180)`
+  - addr: `הדרים פינת המיסדים`
+
+### לוד — 2 rows
+
+- `hazi_hinam/hazi_hinam_2230` [city_branch:…]
+  - branch: `קרפור מרקט  גני אביב לוד (2230)`
+  - addr: `ארבע עונות 14`
+- `yeinot_bitan/yeinot_bitan_2230` [city_branch:…]
+  - branch: `קרפור מרקט  גני אביב לוד (2230)`
+  - addr: `ארבע עונות 14`
+
+### קרית אתא — 2 rows
+
+- `hazi_hinam/hazi_hinam_2240` [abbrev:ק.אתא]
+  - branch: `קרפור מרקט  בית וגן ק.אתא (2240)`
+  - addr: `10 העצמאות`
+- `yeinot_bitan/yeinot_bitan_2240` [abbrev:ק.אתא]
+  - branch: `קרפור מרקט  בית וגן ק.אתא (2240)`
+  - addr: `10 העצמאות`
+
+### מגדל העמק — 2 rows
+
+- `hazi_hinam/hazi_hinam_2730` [city_branch:…]
+  - branch: `קרפור מרקט מגדל העמק (2730)`
+  - addr: `ניצנים 39`
+- `yeinot_bitan/yeinot_bitan_2730` [city_branch:…]
+  - branch: `קרפור מרקט מגדל העמק (2730)`
+  - addr: `ניצנים 39`
+
+### סביון — 2 rows
+
+- `hazi_hinam/hazi_hinam_3506` [city_branch:…]
+  - branch: `קרפור סיטי  גבעת סביון (3506)`
+  - addr: `78 הגליל`
+- `yeinot_bitan/yeinot_bitan_3506` [city_branch:…]
+  - branch: `קרפור סיטי  גבעת סביון (3506)`
+  - addr: `78 הגליל`
+
+### רמת השרון — 2 rows
+
+- `hazi_hinam/hazi_hinam_4200` [abbrev:רמה"ש]
+  - branch: `קרפור סיטי  זרובבל רמה"ש (4200)`
+  - addr: `33 סוקולוב`
+- `yeinot_bitan/yeinot_bitan_4200` [abbrev:רמה"ש]
+  - branch: `קרפור סיטי  זרובבל רמה"ש (4200)`
+  - addr: `33 סוקולוב`
+
+### אלעד — 2 rows
+
+- `hazi_hinam/hazi_hinam_4270` [city_branch:…]
+  - branch: `אלעד קרפור מרקט (4270)`
+  - addr: `בן זכאי 32`
+- `yeinot_bitan/yeinot_bitan_4270` [city_branch:…]
+  - branch: `אלעד קרפור מרקט (4270)`
+  - addr: `בן זכאי 32`
+
+### קרית אונו — 2 rows
+
+- `hazi_hinam/hazi_hinam_701` [city_branch:…]
+  - branch: `קרפור סיטי  קרית אונו`
+  - addr: `57  הנשיא`
+- `yeinot_bitan/yeinot_bitan_701` [city_branch:…]
+  - branch: `קרפור סיטי  קרית אונו`
+  - addr: `57  הנשיא`
+
+### בת ים — 2 rows
+
+- `mahsani_hashuk/mahsani_hashuk_029` [city_branch:…]
+  - branch: `בת ים`
+  - addr: `בת ים`
+- `mahsani_hashuk/mahsani_hashuk_183` [city_branch:…]
+  - branch: `קרפור סיטי עוזיאל בת ים`
+  - addr: `5 עוזיאל`
+
+### שדרות — 2 rows
+
+- `mahsani_hashuk/mahsani_hashuk_051` [city_branch:…] _(no-coords)_
+  - branch: `שדרות`
+- `rami_levy/rami_levy_070` [city_branch:…]
+  - branch: `שדרות`
+  - addr: `המשעול הל"ה 4`
+
+### גדרה — 2 rows
+
+- `mahsani_hashuk/mahsani_hashuk_052` [city_branch:…] _(no-coords)_
+  - branch: `גדרה`
+- `mahsani_hashuk/mahsani_hashuk_152` [city_branch:…]
+  - branch: `גדרה פיק אפ`
+  - addr: `unknown`
+
+### נס ציונה — 1 rows
+
+- `mahsani_hashuk/mahsani_hashuk_025` [city_branch:…]
+  - branch: `נס ציונה`
+  - addr: `נס ציונה`
+
+### מעלות תרשיחא — 1 rows
+
+- `mahsani_hashuk/mahsani_hashuk_044` [city_address:…]
+  - branch: `קרפור מרקט  מעלות`
+  - addr: `שלמה שרירא 3 מעלות תרשיחא`
+
+### אור עקיבא — 1 rows
+
+- `mahsani_hashuk/mahsani_hashuk_059` [city_branch:…] _(no-coords)_
+  - branch: `אור עקיבא -שקמים`
+
+### בית שאן — 1 rows
+
+- `mahsani_hashuk/mahsani_hashuk_060` [city_branch:…] _(no-coords)_
+  - branch: `בית שאן`
+
+### טמרה — 1 rows
+
+- `mahsani_hashuk/mahsani_hashuk_121` [city_branch:…]
+  - branch: `קרפור טמרה`
+  - addr: `טמרה`
+
+### גבעת שמואל — 1 rows
+
+- `mahsani_hashuk/mahsani_hashuk_712` [city_branch:…]
+  - branch: `מנחם בגין גבעת שמואל`
+  - addr: `מנחם בגין 23`
+
+### עכו — 1 rows
+
+- `rami_levy/rami_levy_028` [city_branch:…]
+  - branch: `עכו`
+  - addr: `בוליטמור 2 עין המפרץ`
+
+### פרדס חנה — 1 rows
+
+- `rami_levy/rami_levy_029` [city_branch:…]
+  - branch: `פרדס חנה ביג`
+  - addr: `תדהר 1`
+
+### קדימה — 1 rows
+
+- `rami_levy/rami_levy_030` [city_branch:…]
+  - branch: `קדימה`
+  - addr: `הזרם 2`
+
+---
+
+## Unresolved — 214 rows
+
+These keep `city=''` after the backfill. Mostly Tel Aviv / Jerusalem neighborhoods, online stores, and ambiguous mall names.
+
+- `hazi_hinam/hazi_hinam_108`
+  - branch: `קרפור סיטי  פנקס`
+  - addr: `46-50 פנקס`
+- `hazi_hinam/hazi_hinam_1201`
+  - branch: `קרפור מרקט  יהלומים (1201)`
+  - addr: `1 כורזין`
+- `hazi_hinam/hazi_hinam_1228`
+  - branch: `קרפור מרקט  תל כביר (1228)`
+  - addr: `גרינבאום 45 תל כביר`
+- `hazi_hinam/hazi_hinam_140` _(no-coords)_
+  - branch: `אקספרס תל חי`
+- `hazi_hinam/hazi_hinam_1430`
+  - branch: `קרפור סיטי  קיראון (1430)`
+  - addr: `שלמה המלך`
+- `hazi_hinam/hazi_hinam_146` _(no-coords)_
+  - branch: `מישור אדומים פיק אפ`
+- `hazi_hinam/hazi_hinam_156`
+  - branch: `עדן גן העיר`
+  - addr: `אבן גבירול 71`
+- `hazi_hinam/hazi_hinam_213`
+  - branch: `קרפור סיטי  אבן גבירול`
+  - addr: `30 אבן גבירול`
+- `hazi_hinam/hazi_hinam_221`
+  - branch: `קרפור מרקט  מגדל נחום`
+  - addr: `65 שדרות העצמאות`
+- `hazi_hinam/hazi_hinam_2490`
+  - branch: `קרפור סיטי  כפר שלם (2490)`
+  - addr: `10 סנפיר`
+- `hazi_hinam/hazi_hinam_2518`
+  - branch: `בעיר פארק הירקון (2518)`
+  - addr: `1 שלום אש`
+- `hazi_hinam/hazi_hinam_2530`
+  - branch: `בעיר בת גלים (2530)`
+  - addr: `37 העליה השניה`
+- `hazi_hinam/hazi_hinam_2960`
+  - branch: `קרפור סיטי  נוף זכרון (2960)`
+  - addr: `.10 חברה חשבונאית`
+- `hazi_hinam/hazi_hinam_3174`
+  - branch: `קרפור סיטי  בר אילן (3174)`
+  - addr: `האורנים 1 מ.מסחרי`
+- `hazi_hinam/hazi_hinam_3180`
+  - branch: `קרפור סיטי  רמות צהלה (3180)`
+  - addr: `4-6 גרפית`
+- `hazi_hinam/hazi_hinam_3300`
+  - branch: `קרפור מרקט  קניון אביה (3300)`
+  - addr: `קנ.אביה שד.שאול המלך`
+- `hazi_hinam/hazi_hinam_337`
+  - branch: `קרפור סיטי  נאות אפקה`
+  - addr: `15 לאה`
+- `hazi_hinam/hazi_hinam_3440`
+  - branch: `קרפור סיטי  מזכרת בתיה (3440)`
+  - addr: `8 שדרות אליהו`
+- `hazi_hinam/hazi_hinam_3580`
+  - branch: `קרפור סיטי  רמות אלון (3580)`
+  - addr: `29 יגאל אלון`
+- `hazi_hinam/hazi_hinam_3700`
+  - branch: `קרפור מרקט  נווה זאב (3700)`
+  - addr: `64 יוהנה זבוטינסקי`
+- `hazi_hinam/hazi_hinam_3850`
+  - branch: `קרפור סיטי  בית הכרם (3850)`
+  - addr: `אבי זהר`
+- `hazi_hinam/hazi_hinam_388`
+  - branch: `אקספרס דניה`
+  - addr: `חיים הזז 5`
+- `hazi_hinam/hazi_hinam_390`
+  - branch: `שופרסל אקספרס אם המושבות`
+  - addr: `יעל רום 8`
+- `hazi_hinam/hazi_hinam_3990`
+  - branch: `קרפור סיטי  תל ברוך (3990)`
+  - addr: `8 בקר`
+- `hazi_hinam/hazi_hinam_4110`
+  - branch: `קרפור מרקט לב הרצלה (4110)`
+  - addr: `בן גוריון 2`
+- `hazi_hinam/hazi_hinam_413`
+  - branch: `שופרסל ONLINE`
+  - addr: `WWW.SHUFERSAL.CO.IL`
+- `hazi_hinam/hazi_hinam_4130`
+  - branch: `קרפור סיטי  נווה אמירים (4130)`
+  - addr: `82 בן גוריון`
+- `hazi_hinam/hazi_hinam_4160`
+  - branch: `קרפור סיטי  נוף ים (4160)`
+  - addr: `10 שער הים`
+- `hazi_hinam/hazi_hinam_4170`
+  - branch: `בעיר נווה עמל (4170)`
+  - addr: `19 כצנלסון`
+- `hazi_hinam/hazi_hinam_4220`
+  - branch: `קרפור סיטי  נצר סירני (4220)`
+  - addr: `1 אבנר בן נר`
+- `hazi_hinam/hazi_hinam_512` _(no-coords)_
+  - branch: `ליקוט טיב טעם קריות`
+- `hazi_hinam/hazi_hinam_514` _(no-coords)_
+  - branch: `ליקוט ראשון מזרח`
+- `hazi_hinam/hazi_hinam_519` _(no-coords)_
+  - branch: `ליקוט רמת החייל`
+- `hazi_hinam/hazi_hinam_558`
+  - branch: `קרפור סיטי  רמת החייל`
+  - addr: `7 ד.מ. מרכוס`
+- `hazi_hinam/hazi_hinam_580`
+  - branch: `קרפור סיטי  עמק ברכה`
+  - addr: `עמק הברכה`
+- `hazi_hinam/hazi_hinam_598`
+  - branch: `אקספרס הירדן`
+  - addr: `רמת גן הירדן 29`
+- `hazi_hinam/hazi_hinam_674`
+  - branch: `BE  תל ברוך`
+  - addr: `אהרון בקר 8`
+- `hazi_hinam/hazi_hinam_700`
+  - branch: `בית הפירות פסגת זאב`
+  - addr: `שדרות משה דיין 32`
+- `hazi_hinam/hazi_hinam_703`
+  - branch: `בית הפירות פת`
+  - addr: `שדרות דב יוסף`
+- `hazi_hinam/hazi_hinam_705`
+  - branch: `בית הפירות קריית יוב`
+  - addr: `1 אורוגוואי`
+- `hazi_hinam/hazi_hinam_706`
+  - branch: `ב.הפירות ארמון הנציב`
+  - addr: `עולי הגרדום 1`
+- `hazi_hinam/hazi_hinam_718`
+  - branch: `שוויצריה סוקולוב`
+  - addr: `סוקולוב 84`
+- `hazi_hinam/hazi_hinam_729`
+  - branch: `קניון הבאר`
+  - addr: `קניון הבאר`
+- `hazi_hinam/hazi_hinam_762` _(no-coords)_
+  - branch: `BE אוסישקין`
+- `hazi_hinam/hazi_hinam_850`
+  - branch: `קרפור סיטי  קרית שרת`
+  - addr: `1 התקומה`
+- `hazi_hinam/hazi_hinam_9032`
+  - branch: `@ יהלומים ביתן (9032)`
+  - addr: `https://www.ybitan.co.il`
+- `hazi_hinam/hazi_hinam_914`
+  - branch: `קרפור סיטי  נווה אביבים`
+  - addr: `13 אופנהיימר`
+- `mahsani_hashuk/mahsani_hashuk_001`
+  - branch: `יוחננוף מפוח`
+  - addr: `רחוב המפוח 11, אזור התעשיה`
+- `mahsani_hashuk/mahsani_hashuk_007`
+  - branch: `עקרון`
+  - addr: `המלך חסן 1`
+- `mahsani_hashuk/mahsani_hashuk_008`
+  - branch: `אחד העם`
+  - addr: `רחוב אחד העם 19`
+- `mahsani_hashuk/mahsani_hashuk_013`
+  - branch: `חוצות המפרץ`
+  - addr: `החרושת 10 חוצות המפרץ`
+- `mahsani_hashuk/mahsani_hashuk_027`
+  - branch: `יד אליהו`
+  - addr: `יגאל אלון 57`
+- `mahsani_hashuk/mahsani_hashuk_028`
+  - branch: `ראשלצ רמת אליהו`
+  - addr: `משורר השואה 15`
+- `mahsani_hashuk/mahsani_hashuk_033` _(no-coords)_
+  - branch: `איירפורט סיטי`
+- `mahsani_hashuk/mahsani_hashuk_042` _(no-coords)_
+  - branch: `קניון הבאר`
+- `mahsani_hashuk/mahsani_hashuk_046` _(no-coords)_
+  - branch: `מישור אדומים`
+- `mahsani_hashuk/mahsani_hashuk_048`
+  - branch: `אשדות יעקב`
+  - addr: `אשדות יעקב`
+- `mahsani_hashuk/mahsani_hashuk_081`
+  - branch: `קרפור סיטי  ראשון מערב`
+  - addr: `השירה העברית 10`
+- `mahsani_hashuk/mahsani_hashuk_103`
+  - branch: `חצי חינם משלוחים`
+  - addr: `https://shop.hazi-hinam.co.il/`
+- `mahsani_hashuk/mahsani_hashuk_116`
+  - branch: `קרפור סיטי  כיכר דיזינגוף`
+  - addr: `9 ככר דיזנגוף`
+- `mahsani_hashuk/mahsani_hashuk_117`
+  - branch: `סינמה סיטי`
+  - addr: `סינמה סיטי`
+- `mahsani_hashuk/mahsani_hashuk_119` _(no-coords)_
+  - branch: `קרפור כרכור`
+- `mahsani_hashuk/mahsani_hashuk_146` _(no-coords)_
+  - branch: `מישור אדומים פיק אפ`
+- `mahsani_hashuk/mahsani_hashuk_150` _(no-coords)_
+  - branch: `הדרים פיקאפ`
+- `mahsani_hashuk/mahsani_hashuk_156`
+  - branch: `עדן גן העיר`
+  - addr: `אבן גבירול 71`
+- `mahsani_hashuk/mahsani_hashuk_205`
+  - branch: `כל בו חצי חינם לחי`
+  - addr: `הלחי 16 ראשל"צ , ישראל`
+- `mahsani_hashuk/mahsani_hashuk_256`
+  - branch: `קרפור סיטי רמת יוסף`
+  - addr: `20 מבצע סיני`
+- `mahsani_hashuk/mahsani_hashuk_329`
+  - branch: `קרפור סיטי  נאות רחל`
+  - addr: `אילת 36`
+- `mahsani_hashuk/mahsani_hashuk_345`
+  - branch: `קרפור סיטי  נאות שושנים`
+  - addr: `הסתדרות 104`
+- `mahsani_hashuk/mahsani_hashuk_512` _(no-coords)_
+  - branch: `ליקוט טיב טעם קריות`
+- `mahsani_hashuk/mahsani_hashuk_514` _(no-coords)_
+  - branch: `ליקוט ראשון מזרח`
+- `mahsani_hashuk/mahsani_hashuk_519` _(no-coords)_
+  - branch: `ליקוט רמת החייל`
+- `mahsani_hashuk/mahsani_hashuk_610`
+  - branch: `קרפור סיטי  הצרכניה רובע ט ב'ש`
+  - addr: `42 שדרות י-ם`
+- `mahsani_hashuk/mahsani_hashuk_698`
+  - branch: `קרפור סיטי  בית אבות`
+  - addr: `2 שד.הארזים`
+- `mahsani_hashuk/mahsani_hashuk_700`
+  - branch: `בית הפירות פסגת זאב`
+  - addr: `שדרות משה דיין 32`
+- `mahsani_hashuk/mahsani_hashuk_703`
+  - branch: `בית הפירות פת`
+  - addr: `שדרות דב יוסף`
+- `mahsani_hashuk/mahsani_hashuk_706`
+  - branch: `ב.הפירות ארמון הנציב`
+  - addr: `עולי הגרדום 1`
+- `mahsani_hashuk/mahsani_hashuk_718`
+  - branch: `שוויצריה סוקולוב`
+  - addr: `סוקולוב 84`
+- `mahsani_hashuk/mahsani_hashuk_729`
+  - branch: `קניון הבאר`
+  - addr: `קניון הבאר`
+- `mahsani_hashuk/mahsani_hashuk_752`
+  - branch: `קרפור סיטי  רמת אפעל`
+  - addr: `16 שד.האורנים`
+- `osher_ad/osher_ad_140` _(no-coords)_
+  - branch: `אקספרס תל חי`
+- `osher_ad/osher_ad_146` _(no-coords)_
+  - branch: `מישור אדומים פיק אפ`
+- `osher_ad/osher_ad_388`
+  - branch: `אקספרס דניה`
+  - addr: `חיים הזז 5`
+- `osher_ad/osher_ad_390`
+  - branch: `שופרסל אקספרס אם המושבות`
+  - addr: `יעל רום 8`
+- `osher_ad/osher_ad_413`
+  - branch: `שופרסל ONLINE`
+  - addr: `WWW.SHUFERSAL.CO.IL`
+- `osher_ad/osher_ad_598`
+  - branch: `אקספרס הירדן`
+  - addr: `רמת גן הירדן 29`
+- `osher_ad/osher_ad_674`
+  - branch: `BE  תל ברוך`
+  - addr: `אהרון בקר 8`
+- `osher_ad/osher_ad_700`
+  - branch: `בית הפירות פסגת זאב`
+  - addr: `שדרות משה דיין 32`
+- `osher_ad/osher_ad_703`
+  - branch: `בית הפירות פת`
+  - addr: `שדרות דב יוסף`
+- `osher_ad/osher_ad_705`
+  - branch: `בית הפירות קריית יוב`
+  - addr: `1 אורוגוואי`
+- `osher_ad/osher_ad_706`
+  - branch: `ב.הפירות ארמון הנציב`
+  - addr: `עולי הגרדום 1`
+- `osher_ad/osher_ad_718`
+  - branch: `שוויצריה סוקולוב`
+  - addr: `סוקולוב 84`
+- `osher_ad/osher_ad_729`
+  - branch: `קניון הבאר`
+  - addr: `קניון הבאר`
+- `osher_ad/osher_ad_762` _(no-coords)_
+  - branch: `BE אוסישקין`
+- `rami_levy/rami_levy_005`
+  - branch: `רב מכר`
+  - addr: `הפרסה 3`
+- `rami_levy/rami_levy_008`
+  - branch: `שער בנימין`
+  - addr: `מרכז מסחרי מטה בנמין`
+- `rami_levy/rami_levy_009`
+  - branch: `קסיטנה`
+  - addr: `א.ת באר טוביה`
+- `rami_levy/rami_levy_022`
+  - branch: `כנפי נשרים`
+  - addr: `כנפי נשרים 26`
+- `rami_levy/rami_levy_023`
+  - branch: `גוש עציון`
+  - addr: `צומת גוש עציון`
+- `rami_levy/rami_levy_039`
+  - branch: `מרלוג אינטרנט`
+  - addr: `https://www.rami-levy.co.il/he`
+- `rami_levy/rami_levy_048`
+  - branch: `עטרות`
+  - addr: `קניון עטרות`
+- `rami_levy/rami_levy_055` _(no-coords)_
+  - branch: `רמת החייל`
+- `rami_levy/rami_levy_140` _(no-coords)_
+  - branch: `אקספרס תל חי`
+- `rami_levy/rami_levy_388`
+  - branch: `אקספרס דניה`
+  - addr: `חיים הזז 5`
+- `rami_levy/rami_levy_390`
+  - branch: `שופרסל אקספרס אם המושבות`
+  - addr: `יעל רום 8`
+- `rami_levy/rami_levy_413`
+  - branch: `שופרסל ONLINE`
+  - addr: `WWW.SHUFERSAL.CO.IL`
+- `rami_levy/rami_levy_598`
+  - branch: `אקספרס הירדן`
+  - addr: `רמת גן הירדן 29`
+- `rami_levy/rami_levy_674`
+  - branch: `BE  תל ברוך`
+  - addr: `אהרון בקר 8`
+- `rami_levy/rami_levy_700`
+  - branch: `בית הפירות פסגת זאב`
+  - addr: `שדרות משה דיין 32`
+- `rami_levy/rami_levy_703`
+  - branch: `בית הפירות פת`
+  - addr: `שדרות דב יוסף`
+- `rami_levy/rami_levy_705`
+  - branch: `בית הפירות קריית יוב`
+  - addr: `1 אורוגוואי`
+- `rami_levy/rami_levy_706`
+  - branch: `ב.הפירות ארמון הנציב`
+  - addr: `עולי הגרדום 1`
+- `rami_levy/rami_levy_718`
+  - branch: `שוויצריה סוקולוב`
+  - addr: `סוקולוב 84`
+- `rami_levy/rami_levy_729`
+  - branch: `קניון הבאר`
+  - addr: `קניון הבאר`
+- `rami_levy/rami_levy_762` _(no-coords)_
+  - branch: `BE אוסישקין`
+- `shufersal/shufersal_140` _(no-coords)_
+  - branch: `אקספרס תל חי`
+- `shufersal/shufersal_388`
+  - branch: `אקספרס דניה`
+  - addr: `חיים הזז 5`
+- `shufersal/shufersal_390`
+  - branch: `שופרסל אקספרס אם המושבות`
+  - addr: `יעל רום 8`
+- `shufersal/shufersal_413`
+  - branch: `שופרסל ONLINE`
+  - addr: `WWW.SHUFERSAL.CO.IL`
+- `shufersal/shufersal_598`
+  - branch: `אקספרס הירדן`
+  - addr: `רמת גן הירדן 29`
+- `shufersal/shufersal_674`
+  - branch: `BE  תל ברוך`
+  - addr: `אהרון בקר 8`
+- `shufersal/shufersal_762` _(no-coords)_
+  - branch: `BE אוסישקין`
+- `tiv_taam/tiv_taam_140` _(no-coords)_
+  - branch: `אקספרס תל חי`
+- `tiv_taam/tiv_taam_146` _(no-coords)_
+  - branch: `מישור אדומים פיק אפ`
+- `tiv_taam/tiv_taam_156`
+  - branch: `עדן גן העיר`
+  - addr: `אבן גבירול 71`
+- `tiv_taam/tiv_taam_388`
+  - branch: `אקספרס דניה`
+  - addr: `חיים הזז 5`
+- `tiv_taam/tiv_taam_390`
+  - branch: `שופרסל אקספרס אם המושבות`
+  - addr: `יעל רום 8`
+- `tiv_taam/tiv_taam_413`
+  - branch: `שופרסל ONLINE`
+  - addr: `WWW.SHUFERSAL.CO.IL`
+- `tiv_taam/tiv_taam_512` _(no-coords)_
+  - branch: `ליקוט טיב טעם קריות`
+- `tiv_taam/tiv_taam_514` _(no-coords)_
+  - branch: `ליקוט ראשון מזרח`
+- `tiv_taam/tiv_taam_519` _(no-coords)_
+  - branch: `ליקוט רמת החייל`
+- `tiv_taam/tiv_taam_598`
+  - branch: `אקספרס הירדן`
+  - addr: `רמת גן הירדן 29`
+- `tiv_taam/tiv_taam_674`
+  - branch: `BE  תל ברוך`
+  - addr: `אהרון בקר 8`
+- `tiv_taam/tiv_taam_700`
+  - branch: `בית הפירות פסגת זאב`
+  - addr: `שדרות משה דיין 32`
+- `tiv_taam/tiv_taam_703`
+  - branch: `בית הפירות פת`
+  - addr: `שדרות דב יוסף`
+- `tiv_taam/tiv_taam_705`
+  - branch: `בית הפירות קריית יוב`
+  - addr: `1 אורוגוואי`
+- `tiv_taam/tiv_taam_706`
+  - branch: `ב.הפירות ארמון הנציב`
+  - addr: `עולי הגרדום 1`
+- `tiv_taam/tiv_taam_718`
+  - branch: `שוויצריה סוקולוב`
+  - addr: `סוקולוב 84`
+- `tiv_taam/tiv_taam_729`
+  - branch: `קניון הבאר`
+  - addr: `קניון הבאר`
+- `tiv_taam/tiv_taam_762` _(no-coords)_
+  - branch: `BE אוסישקין`
+- `victory/victory_140` _(no-coords)_
+  - branch: `אקספרס תל חי`
+- `victory/victory_388`
+  - branch: `אקספרס דניה`
+  - addr: `חיים הזז 5`
+- `victory/victory_390`
+  - branch: `שופרסל אקספרס אם המושבות`
+  - addr: `יעל רום 8`
+- `victory/victory_413`
+  - branch: `שופרסל ONLINE`
+  - addr: `WWW.SHUFERSAL.CO.IL`
+- `victory/victory_598`
+  - branch: `אקספרס הירדן`
+  - addr: `רמת גן הירדן 29`
+- `victory/victory_674`
+  - branch: `BE  תל ברוך`
+  - addr: `אהרון בקר 8`
+- `victory/victory_700`
+  - branch: `בית הפירות פסגת זאב`
+  - addr: `שדרות משה דיין 32`
+- `victory/victory_703`
+  - branch: `בית הפירות פת`
+  - addr: `שדרות דב יוסף`
+- `victory/victory_705`
+  - branch: `בית הפירות קריית יוב`
+  - addr: `1 אורוגוואי`
+- `victory/victory_706`
+  - branch: `ב.הפירות ארמון הנציב`
+  - addr: `עולי הגרדום 1`
+- `victory/victory_718`
+  - branch: `שוויצריה סוקולוב`
+  - addr: `סוקולוב 84`
+- `victory/victory_729`
+  - branch: `קניון הבאר`
+  - addr: `קניון הבאר`
+- `victory/victory_762` _(no-coords)_
+  - branch: `BE אוסישקין`
+- `yeinot_bitan/yeinot_bitan_108`
+  - branch: `קרפור סיטי  פנקס`
+  - addr: `46-50 פנקס`
+- `yeinot_bitan/yeinot_bitan_1201`
+  - branch: `קרפור מרקט  יהלומים (1201)`
+  - addr: `1 כורזין`
+- `yeinot_bitan/yeinot_bitan_1228`
+  - branch: `קרפור מרקט  תל כביר (1228)`
+  - addr: `גרינבאום 45 תל כביר`
+- `yeinot_bitan/yeinot_bitan_140` _(no-coords)_
+  - branch: `אקספרס תל חי`
+- `yeinot_bitan/yeinot_bitan_1430`
+  - branch: `קרפור סיטי  קיראון (1430)`
+  - addr: `שלמה המלך`
+- `yeinot_bitan/yeinot_bitan_146` _(no-coords)_
+  - branch: `מישור אדומים פיק אפ`
+- `yeinot_bitan/yeinot_bitan_156`
+  - branch: `עדן גן העיר`
+  - addr: `אבן גבירול 71`
+- `yeinot_bitan/yeinot_bitan_213`
+  - branch: `קרפור סיטי  אבן גבירול`
+  - addr: `30 אבן גבירול`
+- `yeinot_bitan/yeinot_bitan_221`
+  - branch: `קרפור מרקט  מגדל נחום`
+  - addr: `65 שדרות העצמאות`
+- `yeinot_bitan/yeinot_bitan_2490`
+  - branch: `קרפור סיטי  כפר שלם (2490)`
+  - addr: `10 סנפיר`
+- `yeinot_bitan/yeinot_bitan_2518`
+  - branch: `בעיר פארק הירקון (2518)`
+  - addr: `1 שלום אש`
+- `yeinot_bitan/yeinot_bitan_2530`
+  - branch: `בעיר בת גלים (2530)`
+  - addr: `37 העליה השניה`
+- `yeinot_bitan/yeinot_bitan_2960`
+  - branch: `קרפור סיטי  נוף זכרון (2960)`
+  - addr: `.10 חברה חשבונאית`
+- `yeinot_bitan/yeinot_bitan_3174`
+  - branch: `קרפור סיטי  בר אילן (3174)`
+  - addr: `האורנים 1 מ.מסחרי`
+- `yeinot_bitan/yeinot_bitan_3180`
+  - branch: `קרפור סיטי  רמות צהלה (3180)`
+  - addr: `4-6 גרפית`
+- `yeinot_bitan/yeinot_bitan_3300`
+  - branch: `קרפור מרקט  קניון אביה (3300)`
+  - addr: `קנ.אביה שד.שאול המלך`
+- `yeinot_bitan/yeinot_bitan_337`
+  - branch: `קרפור סיטי  נאות אפקה`
+  - addr: `15 לאה`
+- `yeinot_bitan/yeinot_bitan_3440`
+  - branch: `קרפור סיטי  מזכרת בתיה (3440)`
+  - addr: `8 שדרות אליהו`
+- `yeinot_bitan/yeinot_bitan_3580`
+  - branch: `קרפור סיטי  רמות אלון (3580)`
+  - addr: `29 יגאל אלון`
+- `yeinot_bitan/yeinot_bitan_3700`
+  - branch: `קרפור מרקט  נווה זאב (3700)`
+  - addr: `64 יוהנה זבוטינסקי`
+- `yeinot_bitan/yeinot_bitan_3850`
+  - branch: `קרפור סיטי  בית הכרם (3850)`
+  - addr: `אבי זהר`
+- `yeinot_bitan/yeinot_bitan_388`
+  - branch: `אקספרס דניה`
+  - addr: `חיים הזז 5`
+- `yeinot_bitan/yeinot_bitan_390`
+  - branch: `שופרסל אקספרס אם המושבות`
+  - addr: `יעל רום 8`
+- `yeinot_bitan/yeinot_bitan_3990`
+  - branch: `קרפור סיטי  תל ברוך (3990)`
+  - addr: `8 בקר`
+- `yeinot_bitan/yeinot_bitan_4110`
+  - branch: `קרפור מרקט לב הרצלה (4110)`
+  - addr: `בן גוריון 2`
+- `yeinot_bitan/yeinot_bitan_413`
+  - branch: `שופרסל ONLINE`
+  - addr: `WWW.SHUFERSAL.CO.IL`
+- `yeinot_bitan/yeinot_bitan_4130`
+  - branch: `קרפור סיטי  נווה אמירים (4130)`
+  - addr: `82 בן גוריון`
+- `yeinot_bitan/yeinot_bitan_4160`
+  - branch: `קרפור סיטי  נוף ים (4160)`
+  - addr: `10 שער הים`
+- `yeinot_bitan/yeinot_bitan_4170`
+  - branch: `בעיר נווה עמל (4170)`
+  - addr: `19 כצנלסון`
+- `yeinot_bitan/yeinot_bitan_4220`
+  - branch: `קרפור סיטי  נצר סירני (4220)`
+  - addr: `1 אבנר בן נר`
+- `yeinot_bitan/yeinot_bitan_512` _(no-coords)_
+  - branch: `ליקוט טיב טעם קריות`
+- `yeinot_bitan/yeinot_bitan_514` _(no-coords)_
+  - branch: `ליקוט ראשון מזרח`
+- `yeinot_bitan/yeinot_bitan_519` _(no-coords)_
+  - branch: `ליקוט רמת החייל`
+- `yeinot_bitan/yeinot_bitan_558`
+  - branch: `קרפור סיטי  רמת החייל`
+  - addr: `7 ד.מ. מרכוס`
+- `yeinot_bitan/yeinot_bitan_580`
+  - branch: `קרפור סיטי  עמק ברכה`
+  - addr: `עמק הברכה`
+- `yeinot_bitan/yeinot_bitan_598`
+  - branch: `אקספרס הירדן`
+  - addr: `רמת גן הירדן 29`
+- `yeinot_bitan/yeinot_bitan_674`
+  - branch: `BE  תל ברוך`
+  - addr: `אהרון בקר 8`
+- `yeinot_bitan/yeinot_bitan_700`
+  - branch: `בית הפירות פסגת זאב`
+  - addr: `שדרות משה דיין 32`
+- `yeinot_bitan/yeinot_bitan_703`
+  - branch: `בית הפירות פת`
+  - addr: `שדרות דב יוסף`
+- `yeinot_bitan/yeinot_bitan_705`
+  - branch: `בית הפירות קריית יוב`
+  - addr: `1 אורוגוואי`
+- `yeinot_bitan/yeinot_bitan_706`
+  - branch: `ב.הפירות ארמון הנציב`
+  - addr: `עולי הגרדום 1`
+- `yeinot_bitan/yeinot_bitan_718`
+  - branch: `שוויצריה סוקולוב`
+  - addr: `סוקולוב 84`
+- `yeinot_bitan/yeinot_bitan_729`
+  - branch: `קניון הבאר`
+  - addr: `קניון הבאר`
+- `yeinot_bitan/yeinot_bitan_762` _(no-coords)_
+  - branch: `BE אוסישקין`
+- `yeinot_bitan/yeinot_bitan_850`
+  - branch: `קרפור סיטי  קרית שרת`
+  - addr: `1 התקומה`
+- `yeinot_bitan/yeinot_bitan_9032`
+  - branch: `@ יהלומים ביתן (9032)`
+  - addr: `https://www.ybitan.co.il`
+- `yeinot_bitan/yeinot_bitan_914`
+  - branch: `קרפור סיטי  נווה אביבים`
+  - addr: `13 אופנהיימר`
+- `yohananof/yohananof_140` _(no-coords)_
+  - branch: `אקספרס תל חי`
+- `yohananof/yohananof_146` _(no-coords)_
+  - branch: `מישור אדומים פיק אפ`
+- `yohananof/yohananof_388`
+  - branch: `אקספרס דניה`
+  - addr: `חיים הזז 5`
+- `yohananof/yohananof_390`
+  - branch: `שופרסל אקספרס אם המושבות`
+  - addr: `יעל רום 8`
+- `yohananof/yohananof_413`
+  - branch: `שופרסל ONLINE`
+  - addr: `WWW.SHUFERSAL.CO.IL`
+- `yohananof/yohananof_598`
+  - branch: `אקספרס הירדן`
+  - addr: `רמת גן הירדן 29`
+- `yohananof/yohananof_674`
+  - branch: `BE  תל ברוך`
+  - addr: `אהרון בקר 8`
+- `yohananof/yohananof_700`
+  - branch: `בית הפירות פסגת זאב`
+  - addr: `שדרות משה דיין 32`
+- `yohananof/yohananof_703`
+  - branch: `בית הפירות פת`
+  - addr: `שדרות דב יוסף`
+- `yohananof/yohananof_705`
+  - branch: `בית הפירות קריית יוב`
+  - addr: `1 אורוגוואי`
+- `yohananof/yohananof_706`
+  - branch: `ב.הפירות ארמון הנציב`
+  - addr: `עולי הגרדום 1`
+- `yohananof/yohananof_718`
+  - branch: `שוויצריה סוקולוב`
+  - addr: `סוקולוב 84`
+- `yohananof/yohananof_729`
+  - branch: `קניון הבאר`
+  - addr: `קניון הבאר`
+- `yohananof/yohananof_762` _(no-coords)_
+  - branch: `BE אוסישקין`

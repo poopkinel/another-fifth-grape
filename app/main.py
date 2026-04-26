@@ -1,14 +1,17 @@
 """FastAPI application for Fifth Grape backend."""
 
+import json
 import os
+import time
 from datetime import datetime, timezone
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Header, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.db import (
     get_conn,
     init_db,
+    insert_events,
     search_products,
     get_prices_for_products,
     get_products_by_ids,
@@ -16,9 +19,19 @@ from app.db import (
     get_last_scrape_time,
     get_canonical_groups,
 )
-from app.models import PriceLookupRequest, PriceLookupResponse, Store, Product, Price
+from app.models import (
+    EventBatch,
+    EventBatchResponse,
+    PriceLookupRequest,
+    PriceLookupResponse,
+    Store,
+    Product,
+    Price,
+)
 
 EXPAND_CANONICAL = os.environ.get("EXPAND_CANONICAL", "true").lower() in ("true", "1", "yes")
+EVENTS_TOKEN = os.environ.get("EVENTS_TOKEN")
+MAX_PROPERTIES_BYTES = 4096
 
 app = FastAPI(title="Fifth Grape API", version="0.1.0")
 
@@ -63,6 +76,7 @@ def products_search(
             barcode=p["barcode"],
             emoji=p["emoji"],
             category=p["category"],
+            imageUrl=p["image_url"],
         )
         for p in rows
     ]
@@ -140,6 +154,7 @@ def lookup_prices(req: PriceLookupRequest):
             barcode=p["barcode"],
             emoji=p["emoji"],
             category=p["category"],
+            imageUrl=p["image_url"],
         )
         for p in raw_products
     ]
@@ -161,3 +176,45 @@ def lookup_prices(req: PriceLookupRequest):
         prices=prices,
         generatedAt=last_scrape or datetime.now(timezone.utc).isoformat(),
     )
+
+
+def _check_events_auth(authorization: str | None) -> None:
+    if not EVENTS_TOKEN:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="events ingestion not configured",
+        )
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="missing bearer token")
+    token = authorization.removeprefix("Bearer ").strip()
+    if token != EVENTS_TOKEN:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid token")
+
+
+@app.post("/v1/events", response_model=EventBatchResponse)
+def ingest_events(batch: EventBatch, authorization: str | None = Header(default=None)):
+    _check_events_auth(authorization)
+
+    server_ts = int(time.time())
+    rows = []
+    for ev in batch.events:
+        props_json = json.dumps(ev.properties, ensure_ascii=False, separators=(",", ":"))
+        if len(props_json.encode("utf-8")) > MAX_PROPERTIES_BYTES:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"event '{ev.event}' properties exceed {MAX_PROPERTIES_BYTES} bytes",
+            )
+        rows.append((
+            batch.distinct_id,
+            ev.event,
+            props_json,
+            ev.client_ts,
+            server_ts,
+            batch.app_version,
+            batch.platform,
+        ))
+
+    with get_conn() as conn:
+        ingested = insert_events(conn, rows)
+
+    return EventBatchResponse(ingested=ingested)

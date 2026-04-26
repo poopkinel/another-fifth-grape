@@ -1,6 +1,6 @@
 """Pydantic models matching the API contract exactly."""
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Store(BaseModel):
@@ -23,6 +23,7 @@ class Product(BaseModel):
     barcode: str | None
     emoji: str | None
     category: str | None
+    imageUrl: str | None = None
 
 
 class Price(BaseModel):
@@ -42,3 +43,20 @@ class PriceLookupResponse(BaseModel):
     products: list[Product]
     prices: list[Price]
     generatedAt: str
+
+
+class EventIn(BaseModel):
+    event: str = Field(..., min_length=1, max_length=64)
+    client_ts: int = Field(..., ge=0)
+    properties: dict = Field(default_factory=dict)
+
+
+class EventBatch(BaseModel):
+    distinct_id: str = Field(..., min_length=1, max_length=64)
+    app_version: str | None = Field(default=None, max_length=32)
+    platform: str | None = Field(default=None, max_length=16)
+    events: list[EventIn] = Field(..., min_length=1, max_length=100)
+
+
+class EventBatchResponse(BaseModel):
+    ingested: int

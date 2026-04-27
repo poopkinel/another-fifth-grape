@@ -2,7 +2,9 @@
 
 Tracker for data-quality problems originating in the supermarket chains' published price/store XML feeds (the feeds mandated by `cpfta_prices_regulations`, pulled via `il-supermarket-scraper` in `app/scraper/runner.py`).
 
-**Purpose.** Evidence base for a possible complaint to the Consumer Protection and Fair Trade Authority (הרשות להגנת הצרכן ולסחר הוגן).
+**Status (2026-04-27).** Complaint not pursued — see changelog. Doc retained as a research log of observed feed quirks. No entry currently meets the bar for a CPFTA complaint.
+
+**Original purpose (preserved for context).** Evidence base for a possible complaint to the Consumer Protection and Fair Trade Authority (הרשות להגנת הצרכן ולסחר הוגן).
 
 **Strict scope: direct-source evidence only.** A claim only graduates into a numbered Confirmed issue (§1, §2, …) when we have eyes on the source XML bytes and the defect is visible in those bytes. Numbers from our own SQLite DB are not regulator-grade — they could be partially or wholly caused by our pipeline (parser, scraper, schema cleaning) — and live in a separate "DB signals worth investigating at source" research log below. The complaint cites only sections marked Confirmed.
 
@@ -12,6 +14,17 @@ Tracker for data-quality problems originating in the supermarket chains' publish
 - 2026-04-26 — §1 strengthened with library-source evidence.
 - 2026-04-26 — §8 (Victory malformed XML) and §9 (Mahsani placeholder + schema deviation) added from operator-fetched verifications.
 - 2026-04-26 — **Restructure to direct-source-only.** §3 (empty `<Address>`, was 157 in our DB), §4 (multi-chain ghost stores, was 531 tuples in our DB) and §7 (Places mismatch rate) moved out of Confirmed because they were derived from DB queries, not direct-source observation. §2 (empty `<City>`) narrowed from "214 in our DB" to "Hazi Hinam StoresFull, 1 of 13 stores directly observed". The DB-derived patterns continue as candidates in the research log; each can graduate back to Confirmed with a per-chain source verification.
+- 2026-04-26 — §10 added (YB / Carrefour Stores file format and naming violations: filename, no gzip, UTF-16 LE without XML declaration, `<ChainID>` casing). §1 strengthened with publisher self-attestation: the same file declares `<ChainName>קרפור</ChainName>` while `<ChainID>` is YB's GS1 prefix.
+- 2026-04-27 — **§1 retracted.** Inspection of the YB Stores file shows ≥5 distinct consumer-facing brands (Carrefour, Yeinot Bitan, Be'er, Shuk Mehadrin, Quik) — all owned and operated by Yeinot Bitan Ltd. — sharing the company's single GS1 prefix `7290055700007` as `<ChainId>`. Multiple brands operated by one legal entity sharing that entity's `<ChainId>` is normal corporate-parent behavior, not a regulatory violation. Earlier §1-strengthening evidence (publisher self-attestation `<ChainName>קרפור</ChainName>`, library-source corroboration) is retracted with the issue.
+- 2026-04-27 — **§2 retracted.** The single empty-`<City>` row in Hazi Hinam's StoresFull is the chain's online delivery service ("חצי חינם משלוחים"), which has no physical location; an empty `<City>` for a non-physical entity is reasonable, not a regulatory defect. With this row removed, no direct-source observation of a regulatorily-improper empty `<City>` remains; §2 has no Confirmed cases.
+- 2026-04-27 — **Complaint dropped in full. §8, §9A, §9B, §10A–D all retracted.** Reasoning per item:
+  - §8 (Victory malformed XML) — checked across other publication dates; the truncation was not repeating. Looks like a one-day publication glitch, not a persistent defect, so it doesn't sustain a complaint.
+  - §9B (Mahsani schema deviation, `<Products>/<Product>` vs `<Items>/<Item>`) — the CPFTA regulation does not mandate any specific schema field or element name; the deviations from de-facto convention (different root, different item wrappers, casing) make consumer code harder but are not regulatory violations.
+  - §9A (Mahsani all-empty placeholder store record) — by extension: one record with empty consumer-identifying fields is at most a data-quality slip, not a violation of a specific publication mandate.
+  - §10A (filename `Stores` not `StoresFull`), §10B (uncompressed `.xml` not `.xml.gz`), §10D (`<ChainID>` casing) — same reasoning as §9B; convention deviations, not regulatory violations.
+  - §10C (UTF-16 LE without XML declaration) — XML 1.0 §4.3.3 explicitly permits UTF-16 with BOM and no declaration; technically standards-compliant.
+
+  Net result: no entry in this tracker meets the bar for a CPFTA complaint. Doc retained as a research log of observed feed quirks for any future re-evaluation; not currently the basis for any regulatory action.
 
 **Verification methods available without re-scraping.**
 
@@ -25,43 +38,42 @@ Tracker for data-quality problems originating in the supermarket chains' publish
 
 | # | Issue | Direct-source confidence | Per-chain evidence |
 |---|-------|--------------------------|--------------------|
-| 1 | Yeinot Bitan publishes Carrefour-branded stores under its own ChainId | **Confirmed** | Library source (`bitan.py:5–15`); Carrefour PriceFull root `<ChainId>=7290055700007` (operator-fetched 2026-04-26) |
-| 2 | Empty `<City>` field shipped in StoresFull | **Confirmed for Hazi Hinam (1 of 13 stores)** | Hazi Hinam StoresFull, operator-fetched 2026-04-26 from `shop.hazi-hinam.co.il/Prices` |
+| 1 | ~~Yeinot Bitan publishes Carrefour-branded stores under its own ChainId~~ | **Withdrawn** 2026-04-27 | — |
+| 2 | ~~Empty `<City>` field shipped in StoresFull~~ | **Withdrawn** 2026-04-27 | — |
 | 3 | (former DB-only finding — moved to research log) | — | — |
 | 4 | (former DB-only finding — moved to research log) | — | — |
 | 5 | ~~Sentinel branch_name values~~ | **Withdrawn** 2026-04-26 | — |
 | 6 | ~~Nameless barcoded products~~ | **Withdrawn** 2026-04-26 | — |
 | 7 | (former suspected pattern — moved to research log) | — | — |
-| 8 | Victory's StoresFull is malformed XML (truncated, no closing tags) | **Confirmed (top-tier severity)** | Victory StoresFull, operator-fetched 2026-04-26 from `laibcatalog.co.il`; lxml strict parser rejects |
-| 9 | Mahsani Hashuk: placeholder store record + non-standard PriceFull schema | **Confirmed** | Mahsani StoresFull + PriceFull, operator-fetched 2026-04-26 from `laibcatalog.co.il` |
+| 8 | ~~Victory's StoresFull is malformed XML (truncated, no closing tags)~~ | **Withdrawn** 2026-04-27 | — |
+| 9 | ~~Mahsani Hashuk: placeholder store record + non-standard PriceFull schema~~ | **Withdrawn** 2026-04-27 | — |
+| 10 | ~~Yeinot Bitan / Carrefour Stores file format & naming violations~~ | **Withdrawn** 2026-04-27 | — |
 
-The numbering gaps (3, 4, 7) are deliberate — those positions previously held DB-only claims that have been demoted to the research log; numbers are kept stable so prior commit / handoff references resolve to the right thing.
-
----
-
-## 1. Carrefour stores published under the Yeinot Bitan ChainId
-
-**What's wrong (source side).** Carrefour-branded stores are published in the Carrefour transparency portal but tagged with Yeinot Bitan's GS1 company prefix as `<ChainId>`. Consumer-facing brand identity is not preserved at the ChainId level. SubChain-level fields could carry the brand distinction but are not consistently populated.
-
-**Direct-source evidence.**
-- `il_supermarket_scarper/scrappers/bitan.py:5–15` defines `class YaynotBitanAndCarrefour(PublishPrice)` with hardcoded `chain_id="7290055700007"` (Yeinot Bitan Ltd.'s GS1 company prefix) and `site_infix="carrefour"` (i.e. the library fetches from `https://prices.carrefour.co.il/`). The `chain_id` is used to *match* file names at the portal — for the match to succeed, the portal's published file names contain `7290055700007`.
-- Operator-fetched Carrefour PriceFull on 2026-04-26 confirmed root `<ChainId>=7290055700007` and store records whose `<StoreName>` identifies them as Carrefour branches.
-
-**Why it matters for the complaint.** The CPFTA transparency regime presumes the consumer can identify which retailer's price they're looking at. Co-publication forces consumer-facing apps to invent ad-hoc heuristics (e.g. our app does a Google Places lookup) just to recover the brand identity. A clean fix is one of: a separate Carrefour `<ChainId>`, or a documented `<SubChainId>` / `<SubChainName>` requirement that distinguishes the brand. Neither is in place today.
+All numbered entries are now either retracted (§1, §2, §5, §6, §8, §9, §10) or demoted to the research log (§3, §4, §7). Numbers are kept stable so prior commit / handoff references resolve to the right thing.
 
 ---
 
-## 2. Empty `<City>` field — Hazi Hinam StoresFull (1 of 13 stores)
+## 1. ~~Carrefour stores published under the Yeinot Bitan ChainId~~ — Withdrawn 2026-04-27
 
-**What's wrong (source side).** Hazi Hinam's published StoresFull contains at least one store record with `<City></City>` — the city element is empty. Without a city, an address like "המכבי 81" is ambiguous: the same street name exists in dozens of Israeli cities, and any consumer-facing geocoding will misplace the store.
+**Status.** Retracted. Direct inspection of the YB Stores file (operator-fetched 2026-04-26 from `https://prices.carrefour.co.il/20260426/Stores7290055700007-000-20260426-000100.xml`) shows 154 stores carrying ≥5 distinct consumer-facing brand names: **Carrefour** (≥143), **Be'er** (בעיר, 6), **Yeinot Bitan** (1 genuine + 1 placeholder URL-as-address record), **Shuk Mehadrin** (1), **Quik** (1, also placeholder URL-as-address). All five are brands owned and operated by Yeinot Bitan Ltd., the legal entity whose GS1 company prefix is `7290055700007`.
 
-**Direct-source evidence.** Operator-fetched Hazi Hinam StoresFull on 2026-04-26 from `https://shop.hazi-hinam.co.il/Prices`. `scripts/verify_source.py` reported `stores_total: 13`, `stores_empty_city: 1`. The verification's evidence Markdown (when run with `scripts/build_evidence.py`) prints the affected store's StoreId, StoreName, Address, and source line number.
+The CPFTA `<ChainId>` is the chain operator's identifier — it identifies the legal entity required to publish the data, not the consumer-facing brand. A holding company operating multiple consumer brands under its single ChainId is normal and consistent with how the regulation is structured. No regulation appears to require a per-brand split into separate `<ChainId>` namespaces.
 
-**Why it matters for the complaint.** The regulation requires publication of store metadata; an empty `<City>` defeats the purpose of the field for the affected record. Even one such row demonstrates a compliance gap.
+The earlier framing — "Carrefour mislabeled under YB" — was the wrong abstraction. The right framing would have been about the absence of any machine-readable brand discriminator (per-store `<SubChainId>` is empty for all 154 stores in the file), but even that is a usability gripe rather than a clear regulatory violation absent a specific rule mandating brand-level disclosure. Pulled from the complaint.
 
-**Distinguishing source vs. ours.** Our pipeline writes empty cities to the DB only when the source field is empty / NaN / digit-only via `_clean_city`. The Hazi Hinam observation is direct in the source XML, so this is unambiguously source-side for that record.
+Earlier "strengthening" evidence — library-source `chain_id` hardcoding, publisher self-attestation `<ChainName>קרפור</ChainName>` — described real facts about the file but does not establish a regulatory violation, so it is retracted with the issue.
 
-**Scope note.** This entry is intentionally narrow to what's been directly verified. Our DB shows 214 stores with empty `city` post-pipeline; the broader pattern is a candidate (see research log) until source verification confirms it for additional chains.
+Kept as a visible retraction so anyone re-reading the doc sees the correction; do not cite the original claim in any complaint.
+
+---
+
+## 2. ~~Empty `<City>` field — Hazi Hinam StoresFull~~ — Withdrawn 2026-04-27
+
+**Status.** Retracted. The single empty-`<City>` row originally cited is `StoreName="חצי חינם משלוחים"` (Hazi Hinam Deliveries), the chain's online delivery service. Its `<Address>` is `https://shop.hazi-hinam.co.il/` — a website URL, not a physical address — confirming the record represents a non-physical entity. An empty `<City>` for a delivery service is a reasonable representation of the absence of a single physical location, not a defect in store-metadata publication.
+
+This was the only direct-source empty-`<City>` row we had verified, so §2 has no remaining Confirmed cases. The broader DB-derived empty-City pattern continues as Candidate A in the research log, but per-chain re-verification needs to distinguish "missing data for a real store" from "intentionally non-physical entity (delivery service / web store / etc.)" before any row graduates back into a Confirmed entry.
+
+Kept as a visible retraction so anyone re-reading the doc sees the correction; do not cite the original claim in any complaint.
 
 ---
 
@@ -97,46 +109,47 @@ The original §7 cited a per-chain skew in `verified_by_places = 'not_at_address
 
 ---
 
-## 8. Victory's published StoresFull is malformed XML
+## 8. ~~Victory's published StoresFull is malformed XML~~ — Withdrawn 2026-04-27
 
-**What's wrong (source side).** Victory (chain_id `7290696200003`, served from `laibcatalog.co.il`) publishes a StoresFull file that is **not valid XML**. The file ends abruptly at line 646, immediately after a `</Store>` close tag, with no closing tags for any of the parent containers (`</Stores>`, `</SubChain>`, `</SubChains>`, root). Standard XML parsers reject the file outright.
+**Status.** Retracted. Operator checked Victory's StoresFull on later publication dates; the truncation observed on 2026-04-26 was not repeating. The malformedness appears to be a one-day publishing glitch rather than a persistent defect, so it does not sustain a complaint about Victory's compliance with the publication requirement.
 
-**Direct-source evidence.**
-- Operator-fetched on 2026-04-26 from `https://laibcatalog.co.il/`.
-- `scripts/verify_source.py` (and `scripts/build_evidence.py`) both encounter `lxml.etree.XMLSyntaxError` / `xml.etree.ElementTree.ParseError` at the truncation point. The evidence bundle quotes the last 600 bytes of the raw file, showing the missing close tags directly.
-- Re-fetching produced the same byte sequence; this is publication state, not transfer corruption.
-
-**Why it matters for the complaint.** The CPFTA regulation requires retailers to *publish* machine-readable price and store data. A file that cannot be parsed by any standard XML implementation is, in any practical sense, not published. Every consumer of the feed — price-comparison sites, regulators auditing compliance, our app — has to either custom-write a recovery parser or treat Victory's data as missing. This is a direct violation of the publication requirement, more severe than empty fields.
-
-**Distinguishing source vs. ours.** No ambiguity. Our pipeline doesn't construct, transform, or rewrite the StoresFull XML; we download the chain-published `.gz` and gunzip it. The malformedness is byte-for-byte what Victory ships.
-
-**Action items.** None on our side — we should *not* "fix" this by writing a recovery parser. Treating malformed publication as if it were valid would obscure a finding worth raising to the regulator.
+Original technical observations preserved below for future reference; do not cite as evidence in any complaint.
 
 ---
 
-## 9. Mahsani Hashuk: empty placeholder store + non-standard PriceFull schema
+**Original observation (for reference, not a complaint claim).** Victory (chain_id `7290696200003`, served from `laibcatalog.co.il`) published on 2026-04-26 a StoresFull file that ended abruptly at line 646 immediately after a `</Store>` close tag, with no closing tags for any of the parent containers (`</Stores>`, `</SubChain>`, `</SubChains>`, root). On that date, both `scripts/verify_source.py` and `scripts/build_evidence.py` failed to parse it under `lxml` strict mode; re-fetching that day produced the same byte sequence. Subsequent dates showed well-formed files.
 
-Two issues at the same chain, both directly observed in the same operator-fetched verification on 2026-04-26.
+---
 
-**§9A — Placeholder store record (all metadata fields empty).** Mahsani Hashuk's StoresFull (chain_id `7290661400001`, served from `laibcatalog.co.il`) contains 1 store record with **every consumer-facing metadata field empty**: `<StoreId>`, `<StoreName>`, `<Address>`, `<City>` all blank. There is no way to identify or locate this store; the record provides nothing.
+## 9. ~~Mahsani Hashuk: empty placeholder store + non-standard PriceFull schema~~ — Withdrawn 2026-04-27
 
-**§9B — Non-standard PriceFull schema.** Mahsani Hashuk's PriceFull does not follow the same schema other chains use:
-- Root element is `<Prices>`, not `<Root>` / `<Envelope>` / similar.
-- Items are wrapped in `<Products>` containing `<Product>` elements, not the much more common `<Items>` containing `<Item>` elements.
-- Element names use mixed casing including `<ChainID>` (uppercase `D`).
+**Status.** Both sub-items retracted.
 
-**Direct-source evidence.**
-- Operator-fetched StoresFull and PriceFull on 2026-04-26 from `laibcatalog.co.il`.
-- `scripts/verify_source.py` reported `stores_total: 1` of all-empty fields for §9A. The bundled evidence quotes the verbatim `<Store/>` placeholder block.
-- Same script reported `items_inspected: 0` for the PriceFull because it iterates `<Item>` only — that 0 is itself the schema-deviation finding for §9B; the file is full of products under the alternate `<Product>` tag (heuristic regex confirms presence).
+- **§9B (non-standard PriceFull schema)** — the CPFTA regulation does not mandate any specific schema field or element name. Deviations from the de-facto convention used by other chains (`<Prices>` root, `<Products>/<Product>` items, `<ChainID>` casing) make consumer code harder to write but are not regulatory violations.
+- **§9A (placeholder all-empty store record)** — by extension: a single record with empty consumer-identifying fields is a data-quality slip rather than a violation of a specific publication mandate.
 
-**Why it matters for the complaint.** Two distinct violations:
-1. Publishing rows with all metadata fields blank defeats the regulation's purpose of letting consumers identify and locate stores.
-2. Schema deviation forces every consumer of Mahsani's feed to either bespoke-code for their format or fail. The CPFTA regime presupposes that the feeds are machine-readable in a uniform way; the regulation should close this gap.
+Original technical observations preserved below for future reference; do not cite as complaint evidence.
 
-**Distinguishing source vs. ours.** We download the chain-published file as-is. Both defects are literally in the bytes Mahsani ships.
+---
 
-**Action items.** None on our side. The schema deviation should *not* be papered over by extending our verifier to absorb it — that would normalize the violation and erase the finding. Mahsani's PriceFull `<ItemName>` empty rate is therefore unmeasured by our standard tooling; if we want that number for the complaint, the cleanest path is a one-shot `grep -cE '<ItemName(\s/?>|>\s*</ItemName>)' file.xml` over the raw file, recorded as ad-hoc evidence rather than baked into the verifier.
+**Original observations (for reference, not complaint claims).** On 2026-04-26, Mahsani Hashuk's StoresFull (chain_id `7290661400001`, served from `laibcatalog.co.il`) contained 1 store record with `<StoreId>`, `<StoreName>`, `<Address>`, and `<City>` all blank. The PriceFull on the same date used a different schema from other chains: root element `<Prices>` (not `<Root>`/`<Envelope>`), items wrapped in `<Products>`/`<Product>` (not `<Items>`/`<Item>`), and `<ChainID>` casing (uppercase D). `scripts/verify_source.py` reported `stores_total: 1` (the all-empty record) and `items_inspected: 0` (the script iterates `<Item>` only, which doesn't match `<Product>`).
+
+---
+
+## 10. ~~Yeinot Bitan / Carrefour Stores file — format and naming violations~~ — Withdrawn 2026-04-27
+
+**Status.** All four sub-items retracted. The CPFTA regulation does not mandate specific filename patterns, gzip compression, encoding choice, or element-name casing.
+
+- **§10A** (filename `Stores` not `StoresFull`) — naming convention, not in the regulation.
+- **§10B** (uncompressed `.xml` not `.xml.gz`) — compression convention, not in the regulation.
+- **§10C** (UTF-16 LE without XML declaration) — XML 1.0 §4.3.3 explicitly permits UTF-16 with BOM and no declaration; standards-compliant.
+- **§10D** (`<ChainID>` casing) — naming convention, same reasoning as §9B.
+
+Original technical observations preserved below for future reference; do not cite as complaint evidence.
+
+---
+
+**Original observations (for reference, not complaint claims).** On 2026-04-26, Yeinot Bitan / Carrefour published its only Stores file at `https://prices.carrefour.co.il/20260426/Stores7290055700007-000-20260426-000100.xml` (HTTP 200, `Server: Apache/2.4.52 (Ubuntu)`, `Content-Type: application/xml`, `Last-Modified: Sat, 25 Apr 2026 21:01:01 GMT`, `Content-Length: 64290`; SHA-256 in the evidence bundle's `manifest.json`). It was the only Stores-type file in the portal listing of 3,286 files. It deviated from the format used by Hazi Hinam / Mahsani / Victory / Shufersal in four ways: filename used `Stores` rather than `StoresFull`; file was raw `.xml` rather than `.xml.gz` (~10× bigger; ~64 KB vs ~6 KB compressed); first 32 bytes were `ff fe 3c 00 52 00 6f 00 6f 00 74 00 3e 00 3c 00 43 00 68 00 61 00 69 00 6e 00 49 00 44 00 3e 00` — UTF-16 LE BOM followed by `<Root><ChainID>` in UTF-16 LE, with no `<?xml ... ?>` declaration; element names used `<ChainID>` (uppercase D) rather than `<ChainId>`. Decoded prefix: `﻿<Root><ChainID>7290055700007</ChainID><ChainName>קרפור</ChainName><LastUpdateDate>2026-04-26</LastUpdateDate>...`.
 
 ---
 
@@ -146,9 +159,9 @@ These are patterns observed in our own SQLite database. They are useful for find
 
 ### Candidate A — Empty `<City>` across non-Hazi-Hinam chains
 
-**DB signal.** `SELECT COUNT(*) FROM stores WHERE city = ''` → 214 on 2026-04-26. Direct-source confirmed for 1 row in Hazi Hinam (graduated to §2). The remaining 213 are from other chains and not directly verified. Some unknown fraction may be `_clean_city` converting digit-only source values (e.g. `<City>0</City>`) to empty — that's a pipeline artifact, not a source defect.
+**DB signal.** `SELECT COUNT(*) FROM stores WHERE city = ''` → 214 on 2026-04-26. The single Hazi Hinam direct-source row that was originally graduated to §2 turned out to be the chain's delivery service (non-physical entity, legitimate empty `<City>`); §2 retracted 2026-04-27. The remaining 213 rows are from other chains and not directly verified. Some unknown fraction may be `_clean_city` converting digit-only source values (e.g. `<City>0</City>`) to empty — that's a pipeline artifact, not a source defect.
 
-**To graduate.** Run `scripts/build_evidence.py` against StoresFull files from one or more additional chains. Each chain whose `<City></City>` rows are visible in the source bytes adds a per-chain entry to §2.
+**To graduate.** Run `scripts/build_evidence.py` against StoresFull files from one or more additional chains. Each empty-`<City>` row found needs to be checked for whether it represents a real-but-mislabeled physical store vs. an intentionally non-physical entity (delivery service, web store, etc.) before it can graduate. Multiple unambiguous mislabeled-physical-store rows would re-open §2 under a tighter framing.
 
 ### Candidate B — Empty `<Address>` field
 
@@ -214,10 +227,11 @@ Direct-source verifications against chain portals, recorded as we run them. Run 
 |------|-------|------|--------|-------|
 | 2026-04-26 | Shufersal | live PriceFull (store 001) | **source-clean**: 4,434 items, 0 empty `<ItemName>` | First verification. Three of our `nan` product_ids found in this PriceFull, all with real Hebrew names — supports §6 retraction. |
 | 2026-04-26 | Shufersal | controlled scrape (limit=2, temp DB) | **pipeline-clean for Shufersal-only**: 4,151 products in temp DB, 1 with `name='nan'` (0.024%) | Lone stray was barcode `7290119380053` (had unit `100 מ"ל` but no source name — single-row source gap, not a pattern). |
-| 2026-04-26 | Yeinot Bitan / Carrefour | local PriceFull (operator-fetched) | **source-clean for `<ItemName>`**: 2,038 items, 0 empty | §1 (Carrefour-under-Yeinot-Bitan ChainId) directly corroborated: root `<ChainId>=7290055700007`, store names visibly Carrefour-branded. |
-| 2026-04-26 | Hazi Hinam | local StoresFull + PriceFull (operator-fetched) | **§2 confirmed (1 of 13 empty `<City>`)**, otherwise source-clean: 7,971 items, 0 empty `<ItemName>`, 0 empty `<Address>` | Reinforces §6 retraction (clean PriceFull names) and feeds §2 (direct empty-City row). |
+| 2026-04-26 | Yeinot Bitan / Carrefour | local PriceFull (operator-fetched) | **source-clean for `<ItemName>`**: 2,038 items, 0 empty | Originally credited as §1 corroboration; §1 retracted 2026-04-27 — see changelog. |
+| 2026-04-26 | Hazi Hinam | local StoresFull + PriceFull (operator-fetched) | **source-clean** (after §2 retraction): 7,971 items, 0 empty `<ItemName>`, 0 empty `<Address>`. The single empty-`<City>` row is the chain's delivery service, not a physical store. | Reinforces §6 retraction (clean PriceFull names). The empty-`<City>` finding (1/13) was originally credited to §2; §2 retracted 2026-04-27 — see changelog. |
 | 2026-04-26 | Mahsani Hashuk (`7290661400001`) | local StoresFull + PriceFull (operator-fetched, `laibcatalog.co.il`) | **§9A and §9B confirmed**. StoresFull: 1 placeholder row (all fields empty). PriceFull: non-standard schema — `<Prices>` root, `<Products>/<Product>`, `<ChainID>`. | `verify_source.py` reported `items_inspected: 0` due to schema deviation; that 0 is itself the §9B finding. |
 | 2026-04-26 | Victory (`7290696200003`) | local StoresFull (operator-fetched, `laibcatalog.co.il`) | **§8 confirmed**: malformed XML, no closing tags, lxml strict-mode rejects. PriceFull untested (parse failure aborted run). | Top-tier severity. |
+| 2026-04-26 | Yeinot Bitan / Carrefour (`7290055700007`) | live Stores file (operator-fetched, `prices.carrefour.co.il`) | **§10A–D confirmed**: filename `Stores...xml` (no `Full`, uncompressed); UTF-16 LE BOM, no XML declaration; `<ChainID>` casing. | First Stores file inspected for YB; only Stores-type file in the entire portal listing of 3,286 entries. Brand-mix of stores (≥5 YB-owned brands all under one ChainId) noted but is not a regulatory finding — §1 retracted 2026-04-27. |
 
 **Outstanding source verifications (next session).** Mahsani's PriceFull `<ItemName>` rate (would need ad-hoc grep over the raw file because of the schema deviation). Victory's PriceFull (its StoresFull parse failure aborted that run). At least one Cerberus-engine chain (Rami Levy / Yohananof / Osher Ad / Tiv Taam) for parity across engines — these need FTP-style auth so they're harder. Each successful run upgrades the relevant research-log candidates into Confirmed entries.
 
@@ -233,7 +247,7 @@ Two tools, used together.
 python scripts/verify_source.py STORES_URL PRICE_URL --expected-chain-id ID --out /tmp/evidence
 ```
 
-**`scripts/build_evidence.py`** — complaint-grade bundle builder. Takes one or many local `.gz` or `.xml` files plus optional fetch metadata, produces a self-contained directory with: byte-identical copies of every source file, gunzipped XMLs, SHA-256 hashes for both, per-file evidence Markdown that calls out each tracker issue (§1 / §2 / §3 / §8 / §9A / §9B) with line numbers and verbatim XML quotes, and a `manifest.json` tying it together.
+**`scripts/build_evidence.py`** — complaint-grade bundle builder. Takes one or many local `.gz` or `.xml` files plus optional fetch metadata, produces a self-contained directory with: byte-identical copies of every source file, gunzipped XMLs, SHA-256 hashes for both, per-file evidence Markdown that calls out each tracker issue (§3 / §8 / §9A / §9B / §10A–D) with line numbers and verbatim XML quotes, and a `manifest.json` tying it together. The script also still performs §1 and §2 checks for now, but those issues are retracted; treat any "**CONFIRMED**" output for §1 or §2 in the per-file evidence as legacy until the script is updated.
 
 ```bash
 python scripts/build_evidence.py file1.gz file2.gz ... \

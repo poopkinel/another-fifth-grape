@@ -1,11 +1,31 @@
 """SQLite database layer for storing scraped supermarket data."""
 
+import json
 import sqlite3
 import os
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
 DB_PATH = os.environ.get("FIFTH_GRAPE_DB", "data/fifth_grape.db")
+
+_CITY_CODES_SEED = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "scraper", "city_codes.json"
+)
+
+
+def _seed_city_codes() -> None:
+    """Populate city_codes from the bundled CBS seed if the table is empty.
+    `INSERT OR IGNORE` so calling this on a populated DB is a no-op except for
+    new entries (e.g. if the seed file is updated)."""
+    if not os.path.exists(_CITY_CODES_SEED):
+        return
+    with open(_CITY_CODES_SEED, encoding="utf-8") as f:
+        rows = json.load(f)
+    with get_conn() as conn:
+        conn.executemany(
+            "INSERT OR IGNORE INTO city_codes (code, name_he, name_en) VALUES (?, ?, ?)",
+            [(r["code"], r["name_he"], r.get("name_en")) for r in rows],
+        )
 
 
 def _ensure_dir():
@@ -146,6 +166,16 @@ def init_db():
             );
             CREATE INDEX IF NOT EXISTS idx_parser_health_run ON parser_health(scrape_run_id);
             CREATE INDEX IF NOT EXISTS idx_parser_health_chain_type ON parser_health(chain_id, file_type);
+
+            -- Israeli Central Bureau of Statistics locality codes ("סמלי
+            -- יישובים"). Some chains (Hazi Hinam confirmed) ship <City> as a
+            -- numeric code rather than a name; this lookup translates them.
+            -- Seeded from app/scraper/city_codes.json by _seed_city_codes().
+            CREATE TABLE IF NOT EXISTS city_codes (
+                code    TEXT PRIMARY KEY,
+                name_he TEXT NOT NULL,
+                name_en TEXT
+            );
         """)
 
         existing_cols = {r[1] for r in conn.execute("PRAGMA table_info(stores)")}
@@ -177,6 +207,13 @@ def init_db():
         if "coords_refetched_at" not in existing_cols:
             conn.execute("ALTER TABLE stores ADD COLUMN coords_refetched_at TEXT")
 
+        # 2026-04-28: city_resolved is the geocoder-friendly place name. For
+        # rows whose source <City> is an Israeli locality code (e.g. Hazi
+        # Hinam ships 8300 = ראשון לציון), this is the looked-up name.
+        # NULL when no lookup match — geocoder falls back to raw `city`.
+        if "city_resolved" not in existing_cols:
+            conn.execute("ALTER TABLE stores ADD COLUMN city_resolved TEXT")
+
         if "place_id" not in existing_cols:
             conn.execute("ALTER TABLE stores ADD COLUMN place_id TEXT")
         if "opening_hours_json" not in existing_cols:
@@ -188,18 +225,26 @@ def init_db():
         if "opening_hours_fetched_at" not in existing_cols:
             conn.execute("ALTER TABLE stores ADD COLUMN opening_hours_fetched_at TEXT")
 
+    _seed_city_codes()
+
 
 # ── Write operations (used by scraper) ──────────────────────────────
 
 def upsert_store(conn: sqlite3.Connection, store: dict):
+    # Resolve numeric municipal codes to place names. Caller passes raw <City>
+    # in `city`; we look it up if it's digits-only and stash the resolved
+    # name in city_resolved (NULL on lookup miss). Geocoder reads city_resolved.
+    raw_city = (store.get("city") or "").strip()
+    store["city_resolved"] = _resolve_city(conn, raw_city)
     conn.execute("""
-        INSERT INTO stores (store_id, chain_id, chain_name, branch_name, address, city, lat, lng)
-        VALUES (:store_id, :chain_id, :chain_name, :branch_name, :address, :city, :lat, :lng)
+        INSERT INTO stores (store_id, chain_id, chain_name, branch_name, address, city, city_resolved, lat, lng)
+        VALUES (:store_id, :chain_id, :chain_name, :branch_name, :address, :city, :city_resolved, :lat, :lng)
         ON CONFLICT(store_id, chain_id) DO UPDATE SET
-            chain_name  = excluded.chain_name,
-            branch_name = excluded.branch_name,
-            address     = excluded.address,
-            city        = excluded.city,
+            chain_name    = excluded.chain_name,
+            branch_name   = excluded.branch_name,
+            address       = excluded.address,
+            city          = excluded.city,
+            city_resolved = excluded.city_resolved,
             lat = CASE
                 WHEN stores.address = excluded.address AND stores.city = excluded.city
                 THEN stores.lat ELSE NULL END,
@@ -210,6 +255,19 @@ def upsert_store(conn: sqlite3.Connection, store: dict):
                 WHEN stores.address = excluded.address AND stores.city = excluded.city
                 THEN stores.geocode_status ELSE NULL END
     """, store)
+
+
+def _resolve_city(conn: sqlite3.Connection, raw_city: str) -> str | None:
+    """If `raw_city` is digits-only (Israeli locality code), return its Hebrew
+    name from city_codes; else return raw_city as-is. Empty input → None."""
+    if not raw_city:
+        return None
+    if not raw_city.isdigit():
+        return raw_city
+    row = conn.execute(
+        "SELECT name_he FROM city_codes WHERE code = ?", (raw_city,)
+    ).fetchone()
+    return row[0] if row else None
 
 
 def upsert_product(conn: sqlite3.Connection, product: dict):

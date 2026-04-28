@@ -37,10 +37,21 @@ GOOGLE_URL = "https://maps.googleapis.com/maps/api/geocode/json"
 QPS_DELAY = 0.05  # ~20 req/sec, well under Google's limits
 
 
+def _is_numeric_city(s: str | None) -> bool:
+    """Some chains (Hazi Hinam) ship <City> as a 4-digit municipal code (8300,
+    6600, ...) rather than a place name. The codes don't match any Google
+    administrative_area and don't help in the textual query either, so we
+    treat them as missing for geocoding while keeping the raw value in the DB
+    — a future code→name lookup pass can still upgrade them in place."""
+    return bool(s) and s.strip().isdigit()
+
+
 def build_query(address: str, city: str) -> str:
-    parts = [p for p in (address.strip(), city.strip()) if p]
+    parts = [address.strip()] if address else []
+    if city and not _is_numeric_city(city):
+        parts.append(city.strip())
     parts.append("Israel")
-    return ", ".join(parts)
+    return ", ".join(p for p in parts if p)
 
 
 def geocode_one(
@@ -51,12 +62,13 @@ def geocode_one(
 ) -> tuple[float, float] | None:
     """Returns (lat, lng) on success, None if zero results. Raises on hard errors.
 
-    If `city` is provided, it's appended to `components` as an
-    `administrative_area` bias — disambiguates same-named streets across cities
-    (e.g. Begin 96 in Tel Aviv vs. Begin 96 in Petah Tikva).
+    If `city` is provided AND is a real place name (not a numeric municipal
+    code), it's appended to `components` as an `administrative_area` bias —
+    disambiguates same-named streets across cities (e.g. Begin 96 in Tel Aviv
+    vs. Begin 96 in Petah Tikva).
     """
     components = "country:IL"
-    if city:
+    if city and not _is_numeric_city(city):
         components += f"|administrative_area:{city}"
     params = {
         "address": query,
@@ -107,7 +119,7 @@ def refetch_city_inferred(api_key: str, limit: int | None, dry_run: bool) -> Non
         "AND city IS NOT NULL AND city != ''"
     )
     sql = (
-        f"SELECT store_id, chain_id, address, city, lat, lng "
+        f"SELECT store_id, chain_id, address, COALESCE(city_resolved, city) AS city, lat, lng "
         f"FROM stores WHERE {where} ORDER BY chain_id, store_id"
     )
     if limit:
@@ -246,8 +258,11 @@ def main():
     where = "lat IS NULL AND address != ''"
     if not args.retry_failed:
         where += " AND (geocode_status IS NULL OR geocode_status != 'no_results')"
+    # COALESCE prefers city_resolved (looked-up name when raw city was a
+    # numeric code) over raw city. Aliased to `city` so the loop below stays
+    # the same shape.
     sql = f"""
-        SELECT store_id, chain_id, address, city
+        SELECT store_id, chain_id, address, COALESCE(city_resolved, city) AS city
         FROM stores
         WHERE {where}
         ORDER BY chain_id, store_id

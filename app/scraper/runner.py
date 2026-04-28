@@ -22,6 +22,54 @@ from app.db import (
     upsert_store,
 )
 from app.scraper.chains import CHAINS, scraper_name_to_chain_id
+from app.scraper.parser_patch import RLE_SENTINEL, apply_parser_patch
+
+# Make every parsed CSV in this process distinguish RLE-masked cells (sentinel)
+# from genuinely-empty source cells (literal empty). All _load_* readers below
+# rely on this. See app/scraper/parser_patch.py for details.
+apply_parser_patch()
+
+
+def _read_parser_csv(
+    path: str,
+    *,
+    health_ctx: tuple | None = None,
+) -> pd.DataFrame:
+    """Read a parser CSV preserving the RLE-vs-empty distinction.
+
+    keep_default_na=False keeps source-empty cells as "" (not NaN). The
+    sentinel-marked cells are then converted to NaN and forward-filled, which
+    recovers RLE-masked values without polluting genuine empties (those stay
+    as "" and are skipped by ffill).
+
+    If health_ctx is provided as (conn, run_id, chain_id, file_type), per-column
+    sentinel/empty/nonempty counts are recorded into parser_health BEFORE
+    recovery — the raw cell distribution is the regression signal we want."""
+    df = pd.read_csv(path, dtype=str, keep_default_na=False)
+    df.columns = [c.strip().lower() for c in df.columns]
+    if health_ctx is not None:
+        conn, run_id, chain_id, file_type = health_ctx
+        _record_parser_health(conn, run_id, chain_id, file_type, os.path.basename(path), df)
+    return df.replace(RLE_SENTINEL, pd.NA).ffill()
+
+
+def _record_parser_health(conn, run_id, chain_id, file_type, csv_basename, raw_df):
+    now = datetime.now(timezone.utc).isoformat()
+    n = len(raw_df)
+    rows = []
+    for col in raw_df.columns:
+        s = raw_df[col]
+        sentinel = int((s == RLE_SENTINEL).sum())
+        empty = int((s == "").sum())
+        nonempty = n - sentinel - empty
+        rows.append((run_id, chain_id, file_type, csv_basename, col,
+                    sentinel, empty, nonempty, n, now))
+    conn.executemany("""
+        INSERT INTO parser_health
+        (scrape_run_id, chain_id, file_type, csv_basename, column_name,
+         rle_masked, empty_count, nonempty_count, total_rows, recorded_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, rows)
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +88,6 @@ def run_scrape(chain_ids: list[str] | None = None, file_limit: int = DEFAULT_FIL
         chain_ids = list(CHAINS.keys())
 
     dump_dir = tempfile.mkdtemp(prefix="fifth_grape_dumps_")
-    parsed_dir = tempfile.mkdtemp(prefix="fifth_grape_parsed_")
 
     try:
         for chain_id in chain_ids:
@@ -59,10 +106,14 @@ def run_scrape(chain_ids: list[str] | None = None, file_limit: int = DEFAULT_FIL
                 )
                 run_id = cur.lastrowid
 
+            # Per-chain parsed_dir: _load_*() pick CSVs by filename prefix only,
+            # so a shared parsed_dir would re-load every prior chain's CSVs and
+            # mis-tag them with the current chain_id.
+            parsed_dir = tempfile.mkdtemp(prefix=f"fifth_grape_parsed_{chain_id}_")
             try:
                 _scrape_chain(scraper_name, dump_dir, file_limit)
                 _parse_chain(scraper_name, dump_dir, parsed_dir)
-                _load_chain(chain_id, scraper_name, parsed_dir)
+                _load_chain(chain_id, scraper_name, parsed_dir, run_id=run_id)
 
                 with get_conn() as conn:
                     conn.execute(
@@ -78,9 +129,10 @@ def run_scrape(chain_ids: list[str] | None = None, file_limit: int = DEFAULT_FIL
                         "UPDATE scrape_runs SET status='error', finished_at=?, error=? WHERE id=?",
                         (datetime.now(timezone.utc).isoformat(), str(e), run_id),
                     )
+            finally:
+                shutil.rmtree(parsed_dir, ignore_errors=True)
     finally:
         shutil.rmtree(dump_dir, ignore_errors=True)
-        shutil.rmtree(parsed_dir, ignore_errors=True)
 
 
 def _scrape_chain(scraper_name: str, dump_dir: str, file_limit: int):
@@ -111,14 +163,15 @@ def _parse_chain(scraper_name: str, dump_dir: str, parsed_dir: str):
     task.start()
 
 
-def _load_chain(chain_id: str, scraper_name: str, parsed_dir: str):
-    """Load parsed CSVs into SQLite."""
-    _load_stores(chain_id, parsed_dir)
-    _load_prices(chain_id, parsed_dir)
-    _load_promotions(chain_id, parsed_dir)
+def _load_chain(chain_id: str, scraper_name: str, parsed_dir: str, run_id: int | None = None):
+    """Load parsed CSVs into SQLite. run_id is optional — when set, parser_health
+    rows are recorded against that scrape run (skipped for ad-hoc loads)."""
+    _load_stores(chain_id, parsed_dir, run_id=run_id)
+    _load_prices(chain_id, parsed_dir, run_id=run_id)
+    _load_promotions(chain_id, parsed_dir, run_id=run_id)
 
 
-def _load_stores(chain_id: str, parsed_dir: str):
+def _load_stores(chain_id: str, parsed_dir: str, run_id: int | None = None):
     """Load store data from parsed CSVs."""
     display_name = CHAINS[chain_id][1]
 
@@ -135,18 +188,11 @@ def _load_stores(chain_id: str, parsed_dir: str):
         for sf in store_files:
             path = os.path.join(parsed_dir, sf)
             try:
-                df = pd.read_csv(path, dtype=str)
+                health_ctx = (conn, run_id, chain_id, "store") if run_id is not None else None
+                df = _read_parser_csv(path, health_ctx=health_ctx)
             except Exception as e:
                 logger.warning("Failed to read %s: %s", sf, e)
                 continue
-
-            # Normalize column names to lowercase
-            df.columns = [c.strip().lower() for c in df.columns]
-
-            # Forward-fill root-level fields the parser only sets on the first row
-            root_cols = [c for c in ("chainid", "chainname", "subchainid", "subchainname") if c in df.columns]
-            if root_cols:
-                df[root_cols] = df[root_cols].ffill()
 
             for _, row in df.iterrows():
                 store_id = str(row.get("storeid", "")).strip()
@@ -165,7 +211,7 @@ def _load_stores(chain_id: str, parsed_dir: str):
                 })
 
 
-def _load_prices(chain_id: str, parsed_dir: str):
+def _load_prices(chain_id: str, parsed_dir: str, run_id: int | None = None):
     """Load product + price data from parsed price CSVs."""
     price_files = [
         f for f in os.listdir(parsed_dir)
@@ -182,25 +228,22 @@ def _load_prices(chain_id: str, parsed_dir: str):
         for pf in price_files:
             path = os.path.join(parsed_dir, pf)
             try:
-                df = pd.read_csv(path, dtype=str)
+                health_ctx = (conn, run_id, chain_id, "price") if run_id is not None else None
+                df = _read_parser_csv(path, health_ctx=health_ctx)
             except Exception as e:
                 logger.warning("Failed to read %s: %s", pf, e)
                 continue
 
-            df.columns = [c.strip().lower() for c in df.columns]
-
-            # Parser only sets root-level fields (chainid, storeid, etc.)
-            # on the first row per file — forward-fill them across all items
-            root_cols = [c for c in ("chainid", "subchainid", "storeid", "bikoretno", "itemstatus") if c in df.columns]
-            if root_cols:
-                df[root_cols] = df[root_cols].ffill()
-
             for _, row in df.iterrows():
                 item_code = str(row.get("itemcode", "")).strip()
-                store_id = str(row.get("storeid", "")).strip()
-                store_id = store_id.lstrip("0") or "0"  # Match store CSV format (no leading zeros)
-                if not item_code or not store_id or item_code == "nan" or store_id == "nan":
+                store_id_raw = str(row.get("storeid", "")).strip()
+                # Skip before the lstrip-fallback below: an all-zeros storeid
+                # ("000") is real and collapses to "0", but empty (or "nan",
+                # for safety against future read-path changes) means the row
+                # has no store and must be dropped.
+                if not item_code or not store_id_raw or item_code == "nan" or store_id_raw == "nan":
                     continue
+                store_id = store_id_raw.lstrip("0") or "0"  # match store CSV (no leading zeros)
 
                 # Price parsing — handle commas, empty strings, NaN
                 raw_price = str(row.get("itemprice", "")).strip().replace(",", "")
@@ -272,7 +315,7 @@ def _to_float(val) -> float | None:
         return None
 
 
-def _load_promotions(chain_id: str, parsed_dir: str):
+def _load_promotions(chain_id: str, parsed_dir: str, run_id: int | None = None):
     """Load promotions + their item lists from parsed promofull CSVs.
 
     The CSV is denormalized: one row per (promotion x item). We group by
@@ -292,19 +335,11 @@ def _load_promotions(chain_id: str, parsed_dir: str):
         for pf in promo_files:
             path = os.path.join(parsed_dir, pf)
             try:
-                df = pd.read_csv(path, dtype=str)
+                health_ctx = (conn, run_id, chain_id, "promo") if run_id is not None else None
+                df = _read_parser_csv(path, health_ctx=health_ctx)
             except Exception as e:
                 logger.warning("Failed to read %s: %s", pf, e)
                 continue
-
-            df.columns = [c.strip().lower() for c in df.columns]
-
-            root_cols = [
-                c for c in ("chainid", "subchainid", "storeid", "bikoretno")
-                if c in df.columns
-            ]
-            if root_cols:
-                df[root_cols] = df[root_cols].ffill()
 
             if "promotionid" not in df.columns or "storeid" not in df.columns:
                 logger.warning(
@@ -315,12 +350,15 @@ def _load_promotions(chain_id: str, parsed_dir: str):
             # Group: one promotion may span many rows (one per item)
             grouped = df.groupby(["storeid", "promotionid"], sort=False, dropna=False)
             for (storeid_raw, promotion_id_raw), group in grouped:
-                store_id = str(storeid_raw or "").strip().lstrip("0") or "0"
+                store_id_str = str(storeid_raw or "").strip()
                 promotion_id = str(promotion_id_raw or "").strip()
                 if not promotion_id or promotion_id == "nan":
                     continue
-                if store_id == "nan":
+                # Skip empty/NaN storeids before the lstrip-fallback below;
+                # otherwise an empty would collapse to "0" and be processed.
+                if not store_id_str or store_id_str == "nan":
                     continue
+                store_id = store_id_str.lstrip("0") or "0"  # "000" → "0"
 
                 head = group.iloc[0]
                 promo_id = f"{chain_id}_{store_id}_{promotion_id}"
@@ -388,9 +426,4 @@ def _clean_address(val) -> str:
 
 
 def _clean_city(val) -> str:
-    s = _nullable(val)
-    if s is None:
-        return ""
-    if s.isdigit():
-        return ""
-    return s
+    return _nullable(val) or ""

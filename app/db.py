@@ -123,6 +123,29 @@ def init_db():
             );
 
             CREATE INDEX IF NOT EXISTS idx_promotion_items_item ON promotion_items(item_code);
+
+            -- Per-scrape per-CSV per-column counts of how the parser library
+            -- handled each cell. rle_masked = library RLE-compressed it
+            -- (recovered by our ffill), empty_count = source XML was empty,
+            -- nonempty_count = literal value passed through. A regression in
+            -- the upstream parser, or a feed format change, surfaces as a
+            -- shift in these counts vs. the same chain's prior runs.
+            CREATE TABLE IF NOT EXISTS parser_health (
+                id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                scrape_run_id  INTEGER NOT NULL,
+                chain_id       TEXT NOT NULL,
+                file_type      TEXT NOT NULL,
+                csv_basename   TEXT NOT NULL,
+                column_name    TEXT NOT NULL,
+                rle_masked     INTEGER NOT NULL,
+                empty_count    INTEGER NOT NULL,
+                nonempty_count INTEGER NOT NULL,
+                total_rows     INTEGER NOT NULL,
+                recorded_at    TEXT NOT NULL,
+                FOREIGN KEY (scrape_run_id) REFERENCES scrape_runs(id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_parser_health_run ON parser_health(scrape_run_id);
+            CREATE INDEX IF NOT EXISTS idx_parser_health_chain_type ON parser_health(chain_id, file_type);
         """)
 
         existing_cols = {r[1] for r in conn.execute("PRAGMA table_info(stores)")}

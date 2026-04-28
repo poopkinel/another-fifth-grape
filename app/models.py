@@ -8,6 +8,11 @@ class Store(BaseModel):
     chainId: str
     chainName: str
     branchName: str
+    # chainId is per legal entity (corporate parent); subChainId carries the
+    # consumer brand (e.g. yeinot_bitan publishes Sheli, Carrefour, Be'er,
+    # Quik all under one chainId — they're distinguishable only by subChain*).
+    subChainId: str | None = None
+    subChainName: str | None = None
     address: str
     city: str
     lat: float | None

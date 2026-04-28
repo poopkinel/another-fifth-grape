@@ -204,6 +204,11 @@ def _load_stores(chain_id: str, parsed_dir: str, run_id: int | None = None):
                     "chain_id": chain_id,
                     "chain_name": display_name,
                     "branch_name": str(row.get("storename", "")).strip(),
+                    # Brand-level identifiers — chain_id is corporate parent;
+                    # sub_chain_* carries the actual consumer brand (Carrefour
+                    # vs Sheli vs Be'er all under chain_id=yeinot_bitan).
+                    "sub_chain_id": _nullable(row.get("subchainid")),
+                    "sub_chain_name": _nullable(row.get("subchainname")),
                     "address": _clean_address(row.get("address")),
                     "city": _clean_city(row.get("city")),
                     "lat": None,  # Filled by geocode.py

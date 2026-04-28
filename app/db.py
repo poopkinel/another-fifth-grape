@@ -214,6 +214,17 @@ def init_db():
         if "city_resolved" not in existing_cols:
             conn.execute("ALTER TABLE stores ADD COLUMN city_resolved TEXT")
 
+        # 2026-04-28: chain_id is per legal entity (corporate parent), but a
+        # single chain_id often spans multiple consumer brands — Yeinot Bitan
+        # publishes Carrefour, Sheli, Be'er, Quik etc. all under one chain_id.
+        # The source XML carries the brand distinction in <SubChainId> and
+        # <SubChainName>; we now persist both so the UI can color/filter by
+        # actual brand instead of corporate parent.
+        if "sub_chain_id" not in existing_cols:
+            conn.execute("ALTER TABLE stores ADD COLUMN sub_chain_id TEXT")
+        if "sub_chain_name" not in existing_cols:
+            conn.execute("ALTER TABLE stores ADD COLUMN sub_chain_name TEXT")
+
         if "place_id" not in existing_cols:
             conn.execute("ALTER TABLE stores ADD COLUMN place_id TEXT")
         if "opening_hours_json" not in existing_cols:
@@ -236,15 +247,27 @@ def upsert_store(conn: sqlite3.Connection, store: dict):
     # name in city_resolved (NULL on lookup miss). Geocoder reads city_resolved.
     raw_city = (store.get("city") or "").strip()
     store["city_resolved"] = _resolve_city(conn, raw_city)
+    store.setdefault("sub_chain_id", None)
+    store.setdefault("sub_chain_name", None)
     conn.execute("""
-        INSERT INTO stores (store_id, chain_id, chain_name, branch_name, address, city, city_resolved, lat, lng)
-        VALUES (:store_id, :chain_id, :chain_name, :branch_name, :address, :city, :city_resolved, :lat, :lng)
+        INSERT INTO stores (
+            store_id, chain_id, chain_name, branch_name,
+            sub_chain_id, sub_chain_name,
+            address, city, city_resolved, lat, lng
+        )
+        VALUES (
+            :store_id, :chain_id, :chain_name, :branch_name,
+            :sub_chain_id, :sub_chain_name,
+            :address, :city, :city_resolved, :lat, :lng
+        )
         ON CONFLICT(store_id, chain_id) DO UPDATE SET
-            chain_name    = excluded.chain_name,
-            branch_name   = excluded.branch_name,
-            address       = excluded.address,
-            city          = excluded.city,
-            city_resolved = excluded.city_resolved,
+            chain_name     = excluded.chain_name,
+            branch_name    = excluded.branch_name,
+            sub_chain_id   = excluded.sub_chain_id,
+            sub_chain_name = excluded.sub_chain_name,
+            address        = excluded.address,
+            city           = excluded.city,
+            city_resolved  = excluded.city_resolved,
             lat = CASE
                 WHEN stores.address = excluded.address AND stores.city = excluded.city
                 THEN stores.lat ELSE NULL END,

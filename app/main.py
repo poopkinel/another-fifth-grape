@@ -136,6 +136,8 @@ def lookup_prices(req: PriceLookupRequest):
             chainId=s["chain_id"],
             chainName=_display_chain_name(s),
             branchName=s["branch_name"],
+            subChainId=s["sub_chain_id"],
+            subChainName=s["sub_chain_name"],
             address=s["address"],
             city=s["city"],
             lat=s["lat"],

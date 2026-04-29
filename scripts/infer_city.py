@@ -337,7 +337,8 @@ def iter_empty_city_rows(conn: sqlite3.Connection):
         """
         SELECT chain_id, store_id, branch_name, address, lat, lng, geocode_status
         FROM stores
-        WHERE city IS NULL OR city = ''
+        WHERE (city IS NULL OR city = '')
+          AND deleted_at IS NULL
         ORDER BY chain_id, store_id
         """
     ).fetchall()

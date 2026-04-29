@@ -119,7 +119,11 @@ def main():
     init_db()
 
     # Build target set. Exclude already-fetched rows unless --force.
-    where = ["verified_by_places = 'verified'", "place_id IS NOT NULL"]
+    where = [
+        "verified_by_places = 'verified'",
+        "place_id IS NOT NULL",
+        "deleted_at IS NULL",
+    ]
     if not args.force:
         where.append("opening_hours_fetched_at IS NULL")
     target_sql = (

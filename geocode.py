@@ -116,7 +116,8 @@ def refetch_city_inferred(api_key: str, limit: int | None, dry_run: bool) -> Non
         "city_inferred_at IS NOT NULL "
         "AND coords_refetched_at IS NULL "
         "AND address IS NOT NULL AND address != '' "
-        "AND city IS NOT NULL AND city != ''"
+        "AND city IS NOT NULL AND city != '' "
+        "AND deleted_at IS NULL"
     )
     sql = (
         f"SELECT store_id, chain_id, address, COALESCE(city_resolved, city) AS city, lat, lng "
@@ -255,7 +256,7 @@ def main():
 
     init_db()
 
-    where = "lat IS NULL AND address != ''"
+    where = "lat IS NULL AND address != '' AND deleted_at IS NULL"
     if not args.retry_failed:
         where += " AND (geocode_status IS NULL OR geocode_status != 'no_results')"
     # COALESCE prefers city_resolved (looked-up name when raw city was a

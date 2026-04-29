@@ -438,7 +438,8 @@ def get_stores_by_keys(
     conn: sqlite3.Connection, keys: list[tuple[str, str]]
 ) -> list[dict]:
     """keys: list of (store_id, chain_id) tuples.
-    Excludes stores marked 'not_at_address' by Places verification.
+    Excludes stores marked 'not_at_address' by Places verification, and
+    soft-deleted (pruned) stores.
     """
     if not keys:
         return []
@@ -447,7 +448,8 @@ def get_stores_by_keys(
     rows = conn.execute(
         f"""SELECT * FROM stores
             WHERE (store_id, chain_id) IN ({placeholders})
-              AND (verified_by_places IS NULL OR verified_by_places != 'not_at_address')""",
+              AND (verified_by_places IS NULL OR verified_by_places != 'not_at_address')
+              AND deleted_at IS NULL""",
         flat,
     ).fetchall()
     return [dict(r) for r in rows]

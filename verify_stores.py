@@ -236,7 +236,7 @@ def main():
         clusters_sql = """
             SELECT address, city
             FROM stores
-            WHERE address != ''
+            WHERE address != '' AND deleted_at IS NULL
             GROUP BY address, city
             HAVING COUNT(*) > 1
                AND SUM(CASE WHEN verified_by_places = 'verified'
@@ -256,7 +256,7 @@ def main():
             SELECT address, city,
                    MAX(CASE WHEN city_inferred_at IS NOT NULL THEN 1 ELSE 0 END) AS city_new
             FROM stores
-            WHERE address != ''
+            WHERE address != '' AND deleted_at IS NULL
             GROUP BY address, city
             HAVING COUNT(*) > 1
                AND {unknown_cond}
@@ -266,7 +266,7 @@ def main():
         clusters_sql = """
             SELECT address, city
             FROM stores
-            WHERE address != ''
+            WHERE address != '' AND deleted_at IS NULL
             GROUP BY address, city
             HAVING COUNT(*) > 1
                AND SUM(CASE WHEN verified_by_places IS NOT NULL THEN 1 ELSE 0 END) = 0
@@ -302,7 +302,7 @@ def main():
         with get_conn() as conn:
             stores = conn.execute(
                 "SELECT chain_id, store_id, lat, lng, verified_by_places, place_id "
-                "FROM stores WHERE address = ? AND city = ?",
+                "FROM stores WHERE address = ? AND city = ? AND deleted_at IS NULL",
                 (address, city),
             ).fetchall()
 

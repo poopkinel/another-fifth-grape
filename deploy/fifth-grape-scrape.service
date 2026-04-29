@@ -12,6 +12,11 @@ EnvironmentFile=/home/fifth-grape/backend/.env
 # (geo-blocked from this VPS for every chain except shufersal). Flip back
 # to 'live' for hosts inside IL that can reach the portals directly.
 Environment=SCRAPE_SOURCE=kaggle
+# Soft-delete stores not seen in this scrape (prune-on-scrape). Stage 5
+# of the rollout; pairs with stage 3's auto-restore on re-appearance and
+# stage 6's sweep-after-30-days. MIN_STORES_FOR_PRUNE=5 in code keeps an
+# empty/partial publish from blanking the chain.
+Environment=PRUNE_STALE_STORES=true
 ExecStart=/home/fifth-grape/backend/.venv/bin/python scrape.py
 TimeoutStartSec=4h
 Nice=10

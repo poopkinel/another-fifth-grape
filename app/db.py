@@ -288,7 +288,12 @@ def upsert_store(conn: sqlite3.Connection, store: dict):
                 THEN stores.lng ELSE NULL END,
             geocode_status = CASE
                 WHEN stores.address = excluded.address AND stores.city = excluded.city
-                THEN stores.geocode_status ELSE NULL END
+                THEN stores.geocode_status ELSE NULL END,
+            -- Auto-restore: a store that re-appears in a scrape gets
+            -- un-soft-deleted. Pairs with stage-5 prune-on-scrape so a row
+            -- pruned during a partial-source day comes back when the
+            -- source recovers, with its old enrichment intact.
+            deleted_at = NULL
     """, store)
 
 

@@ -1,5 +1,5 @@
 [Unit]
-Description=Fifth Grape — scrape supermarket chain XML feeds (PriceFull / StoresFull)
+Description=Fifth Grape — daily Kaggle snapshot → SQLite (stores / prices / promos)
 After=network-online.target
 Wants=network-online.target
 
@@ -8,6 +8,10 @@ Type=oneshot
 User=fifth-grape
 WorkingDirectory=/home/fifth-grape/backend
 EnvironmentFile=/home/fifth-grape/backend/.env
+# kagglehub-anonymous download path; bypasses the per-chain CPFTA portals
+# (geo-blocked from this VPS for every chain except shufersal). Flip back
+# to 'live' for hosts inside IL that can reach the portals directly.
+Environment=SCRAPE_SOURCE=kaggle
 ExecStart=/home/fifth-grape/backend/.venv/bin/python scrape.py
 TimeoutStartSec=4h
 Nice=10

@@ -241,6 +241,13 @@ def init_db():
         if "opening_hours_fetched_at" not in existing_cols:
             conn.execute("ALTER TABLE stores ADD COLUMN opening_hours_fetched_at TEXT")
 
+        # Soft-delete marker for prune-on-scrape: a store seen in a prior
+        # scrape but missing from the current source CSV. Reads filter
+        # `deleted_at IS NULL`; upsert clears it on re-appearance; a sweep
+        # job hard-deletes rows that stay deleted past the recovery window.
+        if "deleted_at" not in existing_cols:
+            conn.execute("ALTER TABLE stores ADD COLUMN deleted_at TEXT")
+
     _seed_city_codes()
 
 

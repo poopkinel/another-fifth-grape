@@ -16,6 +16,25 @@ CHAINS: dict[str, tuple[str, str]] = {
     "super_pharm":  (ScraperFactory.SUPER_PHARM.name,                  "סופר-פארם"),
 }
 
+# Maps our chain_id → file-name stem in the Kaggle dataset
+# (https://www.kaggle.com/datasets/erlichsefi/israeli-supermarkets-2024).
+# Files in the dataset are named e.g. store_file_<stem>.csv,
+# price_full_file_<stem>.csv, promo_full_file_<stem>.csv.
+# Chains in CHAINS but missing here have no Kaggle source — for those,
+# SCRAPE_SOURCE=kaggle skips them with a warning.
+KAGGLE_FILE_STEM: dict[str, str] = {
+    "shufersal":      "shufersal",
+    "rami_levy":      "rami_levy",
+    "victory":        "victory",
+    "yohananof":      "yohananof",
+    "osher_ad":       "osher_ad",
+    "tiv_taam":       "tiv_taam",
+    "yeinot_bitan":   "yayno_bitan_and_carrefour",
+    "hazi_hinam":     "hazi_hinam",
+    "mahsani_hashuk": "mahsani_ashuk",
+    # super_pharm: not in the Kaggle dataset
+}
+
 
 def get_scraper_names() -> list[str]:
     """Return ScraperFactory enum names for all enabled chains."""

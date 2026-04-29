@@ -21,7 +21,7 @@ from app.db import (
     upsert_promotion,
     upsert_store,
 )
-from app.scraper.chains import CHAINS, scraper_name_to_chain_id
+from app.scraper.chains import CHAINS, KAGGLE_FILE_STEM, scraper_name_to_chain_id
 from app.scraper.parser_patch import RLE_SENTINEL, apply_parser_patch
 
 # Make every parsed CSV in this process distinguish RLE-masked cells (sentinel)
@@ -81,11 +81,26 @@ SCRAPE_FILE_TYPES = ["PRICE_FULL_FILE", "STORE_FILE", "PROMO_FULL_FILE"]
 
 
 def run_scrape(chain_ids: list[str] | None = None, file_limit: int = DEFAULT_FILE_LIMIT):
-    """Run full scrape→parse→load pipeline for specified chains (or all)."""
+    """Run full scrape→parse→load pipeline for specified chains (or all).
+
+    SCRAPE_SOURCE env var selects the data origin:
+      live   (default) — download XMLs from each chain's CPFTA portal,
+                         parse them, load CSVs. Geo-blocked from non-IL IPs.
+      kaggle           — pull the daily snapshot from the
+                         erlichsefi/israeli-supermarkets-2024 Kaggle dataset,
+                         ffill the upstream parser's RLE compression, load
+                         the same CSVs. Works anonymously from anywhere.
+    """
     init_db()
 
     if chain_ids is None:
         chain_ids = list(CHAINS.keys())
+
+    source = os.environ.get("SCRAPE_SOURCE", "live").lower()
+    if source not in ("live", "kaggle"):
+        raise ValueError(
+            f"Unknown SCRAPE_SOURCE={source!r}; expected 'live' or 'kaggle'"
+        )
 
     dump_dir = tempfile.mkdtemp(prefix="fifth_grape_dumps_")
 
@@ -95,8 +110,17 @@ def run_scrape(chain_ids: list[str] | None = None, file_limit: int = DEFAULT_FIL
                 logger.warning("Unknown chain_id: %s, skipping", chain_id)
                 continue
 
+            if source == "kaggle" and chain_id not in KAGGLE_FILE_STEM:
+                logger.warning(
+                    "Skipping %s: SCRAPE_SOURCE=kaggle but chain has no "
+                    "Kaggle mapping. Re-run with SCRAPE_SOURCE=live for "
+                    "this chain.", chain_id,
+                )
+                continue
+
             scraper_name, display_name = CHAINS[chain_id]
-            logger.info("═══ Scraping %s (%s) ═══", display_name, chain_id)
+            logger.info("═══ Scraping %s (%s) [source=%s] ═══",
+                        display_name, chain_id, source)
 
             now = datetime.now(timezone.utc).isoformat()
             with get_conn() as conn:
@@ -111,8 +135,12 @@ def run_scrape(chain_ids: list[str] | None = None, file_limit: int = DEFAULT_FIL
             # mis-tag them with the current chain_id.
             parsed_dir = tempfile.mkdtemp(prefix=f"fifth_grape_parsed_{chain_id}_")
             try:
-                _scrape_chain(scraper_name, dump_dir, file_limit)
-                _parse_chain(scraper_name, dump_dir, parsed_dir)
+                if source == "kaggle":
+                    from app.scraper.kaggle_source import populate_parsed_dir
+                    populate_parsed_dir(chain_id, parsed_dir)
+                else:
+                    _scrape_chain(scraper_name, dump_dir, file_limit)
+                    _parse_chain(scraper_name, dump_dir, parsed_dir)
                 _load_chain(chain_id, scraper_name, parsed_dir, run_id=run_id)
 
                 with get_conn() as conn:

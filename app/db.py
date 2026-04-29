@@ -382,8 +382,20 @@ def search_products(
         params.extend([like, like, term])
     where = " AND ".join(clauses)
     params.append(limit)
+    # Order by popularity (store count) so common products surface first in
+    # the list-maker — staples like חלב/לחם/ביצים should appear before
+    # long-tail SKUs that match the same query. Subquery uses
+    # idx_prices_product_id; only fires for products that pass the LIKE
+    # filter, so cost is bounded by match count, not catalog size.
     rows = conn.execute(
-        f"SELECT * FROM products WHERE {where} ORDER BY name LIMIT ?",
+        f"""
+        SELECT p.*,
+               (SELECT COUNT(*) FROM prices WHERE product_id = p.product_id) AS store_count
+        FROM products p
+        WHERE {where}
+        ORDER BY store_count DESC, p.name
+        LIMIT ?
+        """,
         params,
     ).fetchall()
     return [dict(r) for r in rows]

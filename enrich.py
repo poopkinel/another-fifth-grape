@@ -33,6 +33,8 @@ EMOJI_RULES: list[tuple[str, str]] = [
     # Bread & Bakery
     ("באגט", "🥖"),
     ("לחמני", "🍞"),
+    ("פיתות", "🍞"),  # plural pita; must come before תות (line below) which
+                      # otherwise matches the substring inside פיתות → 🍓.
     ("פיתה", "🍞"),
     ("חלה", "🍞"),
     ("לחם", "🍞"),

@@ -136,10 +136,52 @@ def _shorten_categories(categories_str: str) -> str:
     return cleaned[-1] if cleaned else categories_str
 
 
+# Fields we ask OFF to return. Trims response payload + ensures we get every
+# image variant we know how to consume.
+OFF_FIELDS = ",".join([
+    "brands",
+    "categories",
+    "image_front_url",
+    "image_front_he_url",
+    "image_front_en_url",
+    "image_url",
+    "selected_images",
+])
+
+
+def _pick_image_url(product: dict) -> str | None:
+    """Best front image URL from an OFF product dict, Hebrew-first cascade.
+
+    Order: image_front_he_url → image_front_url (OFF's default-language pick)
+    → image_front_en_url → selected_images.front.display.{he,en,*} → image_url
+    (last resort; may be a non-front role).
+    """
+    candidates: list[str | None] = [
+        product.get("image_front_he_url"),
+        product.get("image_front_url"),
+        product.get("image_front_en_url"),
+    ]
+    selected = product.get("selected_images") or {}
+    front_display = (selected.get("front") or {}).get("display") or {}
+    candidates.append(front_display.get("he"))
+    candidates.append(front_display.get("en"))
+    for lang, url in front_display.items():
+        if lang not in ("he", "en"):
+            candidates.append(url)
+    candidates.append(product.get("image_url"))
+
+    for c in candidates:
+        if isinstance(c, str):
+            c = c.strip()
+            if c:
+                return c
+    return None
+
+
 def fetch_product(session: requests.Session, barcode: str) -> dict | None:
     """Query OFF for a single barcode. Returns parsed fields or None."""
     url = f"{OFF_API}/{barcode}.json"
-    resp = session.get(url, timeout=15)
+    resp = session.get(url, params={"fields": OFF_FIELDS}, timeout=15)
     if resp.status_code == 404:
         return None
     if resp.status_code == 429:
@@ -156,7 +198,7 @@ def fetch_product(session: requests.Session, barcode: str) -> dict | None:
     product = data.get("product", {})
     brand = product.get("brands", "").strip() or None
     categories = product.get("categories", "").strip() or None
-    image_url = product.get("image_front_url", "").strip() or None
+    image_url = _pick_image_url(product)
 
     if not any([brand, categories, image_url]):
         return None
@@ -180,6 +222,20 @@ def show_stats():
         has_brand = conn.execute("SELECT COUNT(*) FROM products WHERE brand IS NOT NULL AND brand != ''").fetchone()[0]
         has_emoji = conn.execute("SELECT COUNT(*) FROM products WHERE emoji IS NOT NULL").fetchone()[0]
         has_cat = conn.execute("SELECT COUNT(*) FROM products WHERE category IS NOT NULL").fetchone()[0]
+        has_img = conn.execute("SELECT COUNT(*) FROM products WHERE image_url IS NOT NULL").fetchone()[0]
+
+        # Popularity-weighted image coverage: of all (product, store) price rows,
+        # how many resolve to a product that has an image? Better proxy for
+        # "what fraction of basket-adds will show an image" than raw catalog %.
+        weighted = conn.execute("""
+            SELECT
+                COUNT(*) AS total_rows,
+                SUM(CASE WHEN p.image_url IS NOT NULL THEN 1 ELSE 0 END) AS with_image
+            FROM prices pr
+            JOIN products p ON p.product_id = pr.product_id
+        """).fetchone()
+        total_rows = weighted["total_rows"] or 0
+        with_image = weighted["with_image"] or 0
 
     print(f"OFF lookup progress: {checked}/{total} checked ({100*checked/total:.1f}%)")
     print(f"  found:     {found}")
@@ -190,6 +246,10 @@ def show_stats():
     print(f"  brand:     {has_brand}/{total} ({100*has_brand/total:.1f}%)")
     print(f"  emoji:     {has_emoji}/{total} ({100*has_emoji/total:.1f}%)")
     print(f"  category:  {has_cat}/{total} ({100*has_cat/total:.1f}%)")
+    print(f"  image:     {has_img}/{total} ({100*has_img/total:.1f}%)")
+    if total_rows:
+        print(f"  image (popularity-weighted): {with_image}/{total_rows} "
+              f"({100*with_image/total_rows:.1f}%)")
 
 
 def main():
@@ -221,25 +281,38 @@ def main():
     # Default: barcoded products never checked yet (no off_lookups row).
     # With --refresh-images: also include previously-found rows that still
     # have no image_url, so the backfill picks them up.
+    # Order by store-count DESC so popular SKUs get covered first — even a
+    # partial run hits the products users actually see.
+    popularity_cte = """
+        WITH popularity AS (
+            SELECT product_id, COUNT(*) AS store_count
+            FROM prices
+            GROUP BY product_id
+        )
+    """
     if args.refresh_images:
-        sql = """
-            SELECT p.product_id, p.barcode, p.brand, p.emoji, p.category, p.image_url
+        sql = popularity_cte + """
+            SELECT p.product_id, p.barcode, p.brand, p.emoji, p.category, p.image_url,
+                   COALESCE(pop.store_count, 0) AS store_count
             FROM products p
             LEFT JOIN off_lookups o ON p.product_id = o.product_id
+            LEFT JOIN popularity pop ON p.product_id = pop.product_id
             WHERE p.barcode IS NOT NULL
               AND (
                   o.product_id IS NULL
                   OR (o.status = 'found' AND p.image_url IS NULL)
               )
-            ORDER BY p.product_id
+            ORDER BY store_count DESC, p.product_id
         """
     else:
-        sql = """
-            SELECT p.product_id, p.barcode, p.brand, p.emoji, p.category, p.image_url
+        sql = popularity_cte + """
+            SELECT p.product_id, p.barcode, p.brand, p.emoji, p.category, p.image_url,
+                   COALESCE(pop.store_count, 0) AS store_count
             FROM products p
             LEFT JOIN off_lookups o ON p.product_id = o.product_id
+            LEFT JOIN popularity pop ON p.product_id = pop.product_id
             WHERE p.barcode IS NOT NULL AND o.product_id IS NULL
-            ORDER BY p.product_id
+            ORDER BY store_count DESC, p.product_id
         """
     if args.limit:
         sql += f" LIMIT {int(args.limit)}"
@@ -276,17 +349,22 @@ def main():
                         "INSERT OR IGNORE INTO off_lookups (product_id, status) VALUES (?, 'not_found')",
                         (row["product_id"],),
                     )
+                    conn.execute(
+                        "UPDATE products SET image_tried_at = datetime('now') WHERE product_id = ?",
+                        (row["product_id"],),
+                    )
         else:
             n_found += 1
             if args.dry_run:
-                logger.info("FOUND %s: brand=%s cat=%s emoji=%s img=%s",
-                            barcode, result["brand"], result["category"],
+                logger.info("FOUND %s [%d stores]: brand=%s cat=%s emoji=%s img=%s",
+                            barcode, row["store_count"], result["brand"], result["category"],
                             result["emoji"], bool(result["image_url"]))
             else:
                 with get_conn() as conn:
-                    # Only fill fields that are currently empty
+                    # Only fill fields that are currently empty (image_tried_at
+                    # is always refreshed below).
                     updates = {}
-                    sets = []
+                    sets = ["image_tried_at = datetime('now')"]
                     if (not row["brand"]) and result["brand"]:
                         sets.append("brand = :brand")
                         updates["brand"] = result["brand"]
@@ -302,12 +380,11 @@ def main():
                         sets.append("image_url = :image_url")
                         updates["image_url"] = result["image_url"]
 
-                    if sets:
-                        updates["product_id"] = row["product_id"]
-                        conn.execute(
-                            f"UPDATE products SET {', '.join(sets)} WHERE product_id = :product_id",
-                            updates,
-                        )
+                    updates["product_id"] = row["product_id"]
+                    conn.execute(
+                        f"UPDATE products SET {', '.join(sets)} WHERE product_id = :product_id",
+                        updates,
+                    )
 
                     conn.execute(
                         "INSERT OR IGNORE INTO off_lookups (product_id, status) VALUES (?, 'found')",

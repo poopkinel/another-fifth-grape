@@ -189,6 +189,11 @@ def init_db():
             conn.execute("ALTER TABLE products ADD COLUMN canonical_product_id TEXT")
         if "image_url" not in product_cols:
             conn.execute("ALTER TABLE products ADD COLUMN image_url TEXT")
+        # Set whenever enrich_off.py queries OFF for a product's image, even
+        # when no image came back. Lets a periodic refresh target rows we
+        # haven't asked about in N days (OFF coverage grows over time).
+        if "image_tried_at" not in product_cols:
+            conn.execute("ALTER TABLE products ADD COLUMN image_tried_at TEXT")
         conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_products_canonical "
             "ON products(canonical_product_id)"

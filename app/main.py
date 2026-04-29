@@ -2,11 +2,15 @@
 
 import json
 import os
+import re
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 
+import requests
 from fastapi import FastAPI, Header, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from app.db import (
     get_conn,
@@ -33,6 +37,12 @@ EXPAND_CANONICAL = os.environ.get("EXPAND_CANONICAL", "true").lower() in ("true"
 EVENTS_TOKEN = os.environ.get("EVENTS_TOKEN")
 MAX_PROPERTIES_BYTES = 4096
 
+IMAGE_CACHE_DIR = Path(os.environ.get("IMAGE_CACHE_DIR", "data/image_cache"))
+IMAGE_FETCH_TIMEOUT = 15
+IMAGE_PROXY_USER_AGENT = "FifthGrape-image-proxy/1.0 (contact: dev@fifth-grape.local)"
+IMAGE_CACHE_MAX_AGE = 60 * 60 * 24 * 30  # 30 days
+_SAFE_ID_RE = re.compile(r"[^A-Za-z0-9_-]")
+
 app = FastAPI(title="Fifth Grape API", version="0.1.0")
 
 app.add_middleware(
@@ -46,6 +56,14 @@ app.add_middleware(
 @app.on_event("startup")
 def startup():
     init_db()
+
+
+def _proxy_image_path(product_id: str, image_url: str | None) -> str | None:
+    """Relative proxy path for the API response, or None if no image is on file.
+    Frontend prepends its API base; clients never see the upstream OFF URL."""
+    if not image_url:
+        return None
+    return f"/v1/products/{product_id}/image"
 
 
 def _display_chain_name(store_row) -> str:
@@ -76,10 +94,55 @@ def products_search(
             barcode=p["barcode"],
             emoji=p["emoji"],
             category=p["category"],
-            imageUrl=p["image_url"],
+            imageUrl=_proxy_image_path(p["product_id"], p["image_url"]),
         )
         for p in rows
     ]
+
+
+@app.get("/v1/products/{product_id}/image")
+def get_product_image(product_id: str):
+    """Proxy product images: cache OFF (or other-source) image bytes on disk
+    and serve them. Closes the privacy leak of pointing the client at OFF
+    directly (BACKLOG.md → "Image proxy through backend"); also fronts any
+    future non-OFF image source uniformly.
+    """
+    safe_id = _SAFE_ID_RE.sub("_", product_id)
+    cache_path = IMAGE_CACHE_DIR / f"{safe_id}.jpg"
+    cache_headers = {"Cache-Control": f"public, max-age={IMAGE_CACHE_MAX_AGE}"}
+
+    if cache_path.exists():
+        return FileResponse(cache_path, media_type="image/jpeg", headers=cache_headers)
+
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT image_url FROM products WHERE product_id = ?",
+            (product_id,),
+        ).fetchone()
+
+    if not row:
+        raise HTTPException(status_code=404, detail="product not found")
+    image_url = row["image_url"]
+    if not image_url:
+        raise HTTPException(status_code=404, detail="no image")
+
+    try:
+        resp = requests.get(
+            image_url,
+            timeout=IMAGE_FETCH_TIMEOUT,
+            headers={"User-Agent": IMAGE_PROXY_USER_AGENT},
+        )
+        resp.raise_for_status()
+    except requests.RequestException:
+        raise HTTPException(status_code=502, detail="upstream image fetch failed")
+
+    IMAGE_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    # Atomic write so concurrent requests don't see a torn file.
+    tmp = cache_path.with_suffix(cache_path.suffix + ".tmp")
+    tmp.write_bytes(resp.content)
+    tmp.rename(cache_path)
+
+    return FileResponse(cache_path, media_type="image/jpeg", headers=cache_headers)
 
 
 @app.post("/v1/prices/lookup", response_model=PriceLookupResponse)
@@ -156,7 +219,7 @@ def lookup_prices(req: PriceLookupRequest):
             barcode=p["barcode"],
             emoji=p["emoji"],
             category=p["category"],
-            imageUrl=p["image_url"],
+            imageUrl=_proxy_image_path(p["product_id"], p["image_url"]),
         )
         for p in raw_products
     ]

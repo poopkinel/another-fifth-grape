@@ -172,7 +172,20 @@ def _load_chain(chain_id: str, scraper_name: str, parsed_dir: str, run_id: int |
 
 
 def _load_stores(chain_id: str, parsed_dir: str, run_id: int | None = None):
-    """Load store data from parsed CSVs."""
+    """Load store data from parsed CSVs.
+
+    Prune-on-scrape (when PRUNE_STALE_STORES=true): after loading every
+    store row from this scrape, soft-delete any store row in the DB for
+    this chain_id whose store_id wasn't seen. The upsert in stage 3
+    auto-restores deleted_at = NULL on re-appearance, so a row that
+    disappears for one scrape and comes back in the next gets its
+    enrichment kept.
+
+    MIN_STORES_FOR_PRUNE guards against accidentally blanking a chain
+    when the source's StoresFull is empty (regulatory: chains only
+    publish StoresFull on change — Victory's empty file is legit, not a
+    deletion signal). 0 < seen < MIN means we abort prune for this chain.
+    """
     display_name = CHAINS[chain_id][1]
 
     store_files = [
@@ -183,6 +196,8 @@ def _load_stores(chain_id: str, parsed_dir: str, run_id: int | None = None):
     if not store_files:
         logger.warning("No store files found for %s", chain_id)
         return
+
+    seen_store_ids: set[str] = set()
 
     with get_conn() as conn:
         for sf in store_files:
@@ -199,8 +214,10 @@ def _load_stores(chain_id: str, parsed_dir: str, run_id: int | None = None):
                 if not store_id or store_id == "nan":
                     continue
 
+                full_store_id = f"{chain_id}_{store_id}"
+                seen_store_ids.add(full_store_id)
                 upsert_store(conn, {
-                    "store_id": f"{chain_id}_{store_id}",
+                    "store_id": full_store_id,
                     "chain_id": chain_id,
                     "chain_name": display_name,
                     "branch_name": str(row.get("storename", "")).strip(),
@@ -214,6 +231,45 @@ def _load_stores(chain_id: str, parsed_dir: str, run_id: int | None = None):
                     "lat": None,  # Filled by geocode.py
                     "lng": None,
                 })
+
+        _prune_stale_stores(conn, chain_id, seen_store_ids)
+
+
+# Default 5: small enough not to over-protect tiny real chains, large
+# enough to refuse to soft-delete an entire chain when StoresFull came
+# back empty/near-empty (regulation says chains only republish on change).
+MIN_STORES_FOR_PRUNE = 5
+
+
+def _prune_stale_stores(conn, chain_id: str, seen_store_ids: set[str]) -> None:
+    """Soft-delete any non-seen store for this chain. No-op unless
+    PRUNE_STALE_STORES=true; aborts when seen_store_ids is too small."""
+    if os.environ.get("PRUNE_STALE_STORES", "").lower() not in ("true", "1", "yes"):
+        return
+
+    n_seen = len(seen_store_ids)
+    if n_seen < MIN_STORES_FOR_PRUNE:
+        logger.warning(
+            "Skipping prune for %s: only %d stores seen (< %d threshold). "
+            "Likely an empty/partial StoresFull publish; not a real deletion.",
+            chain_id, n_seen, MIN_STORES_FOR_PRUNE,
+        )
+        return
+
+    placeholders = ",".join("?" * n_seen)
+    cur = conn.execute(
+        f"""UPDATE stores
+            SET deleted_at = datetime('now')
+            WHERE chain_id = ?
+              AND deleted_at IS NULL
+              AND store_id NOT IN ({placeholders})""",
+        (chain_id, *seen_store_ids),
+    )
+    if cur.rowcount:
+        logger.info(
+            "Pruned %d stale store(s) for %s (seen=%d).",
+            cur.rowcount, chain_id, n_seen,
+        )
 
 
 def _load_prices(chain_id: str, parsed_dir: str, run_id: int | None = None):

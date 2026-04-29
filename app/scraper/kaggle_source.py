@@ -37,6 +37,12 @@ _RLE_METADATA_MULTI_STORE = (
 
 _dataset_path: str | None = None
 
+# How many versions to walk back when looking for a non-empty store file
+# (per the regulatory pattern, chains only republish StoresFull on change,
+# so a chain that hasn't changed for weeks shows up as a string of empty
+# files in the dataset). 60 covers ~2 months of daily publications.
+_MAX_STORE_WALKBACK = 60
+
 
 def _download_dataset() -> str:
     """Download (or use cached) latest Kaggle snapshot. Cached per-process so
@@ -48,6 +54,52 @@ def _download_dataset() -> str:
     _dataset_path = kagglehub.dataset_download(KAGGLE_DATASET)
     logger.info("Kaggle dataset %s available at %s", KAGGLE_DATASET, _dataset_path)
     return _dataset_path
+
+
+def _line_count(path) -> int:
+    with open(path, encoding="utf-8") as f:
+        return sum(1 for _ in f)
+
+
+def _resolve_store_csv(stem: str) -> Path:
+    """Return the path to the most recent non-empty store_file_<stem>.csv.
+
+    Walks back versions because chains are only required to republish
+    StoresFull when their store list changes — a chain that's stable for
+    weeks publishes a string of header-only files in the dataset. The
+    latest non-empty file is therefore the current store list, not stale.
+    """
+    import kagglehub
+    latest_root = Path(_download_dataset())
+    latest_version = int(latest_root.name)
+    latest_file = latest_root / f"store_file_{stem}.csv"
+    if latest_file.exists() and _line_count(latest_file) > 1:
+        return latest_file
+
+    for offset in range(1, _MAX_STORE_WALKBACK + 1):
+        version = latest_version - offset
+        if version < 1:
+            break
+        try:
+            path = kagglehub.dataset_download(
+                f"{KAGGLE_DATASET}/versions/{version}",
+                path=f"store_file_{stem}.csv",
+            )
+        except Exception as e:
+            logger.debug("v%d unavailable for %s: %s", version, stem, e)
+            continue
+        if _line_count(path) > 1:
+            logger.warning(
+                "Walked back %d versions for %s store file (latest=v%d is empty). "
+                "Using v%d.",
+                offset, stem, latest_version, version,
+            )
+            return Path(path)
+
+    raise RuntimeError(
+        f"No non-empty store_file_{stem}.csv in the last "
+        f"{_MAX_STORE_WALKBACK} versions of {KAGGLE_DATASET}."
+    )
 
 
 def _ffill_metadata(df: pd.DataFrame, columns) -> pd.DataFrame:
@@ -69,30 +121,29 @@ def _patch_kaggle_csv(src: Path, dst: Path, file_kind: str) -> None:
     df.to_csv(dst, index=False)
 
 
-# (Kaggle filename-prefix, our internal file kind). The prefixes match
-# what _load_stores / _load_prices / _load_promotions glob for, so we
-# preserve them when copying into parsed_dir.
-_FILE_TYPES = (
-    ("store_file_", "store"),
-    ("price_full_file_", "price"),
-    ("promo_full_file_", "promo"),
-)
-
-
 def populate_parsed_dir(chain_id: str, parsed_dir: str) -> None:
     """Copy this chain's store/price/promo CSVs from the Kaggle snapshot
     into parsed_dir, ffilling RLE-collapsed metadata so _load_chain can
     consume them unchanged.
 
+    The store file is resolved via _resolve_store_csv (walks back to the
+    last non-empty version for chains that haven't republished recently);
+    price/promo files always come from the latest version because they're
+    refreshed daily.
+
     Raises KeyError if chain_id has no Kaggle mapping."""
     if chain_id not in KAGGLE_FILE_STEM:
         raise KeyError(f"chain_id={chain_id!r} has no Kaggle source mapping")
     stem = KAGGLE_FILE_STEM[chain_id]
-    src_root = Path(_download_dataset())
+    latest_root = Path(_download_dataset())
     parsed = Path(parsed_dir)
 
-    for prefix, kind in _FILE_TYPES:
-        src = src_root / f"{prefix}{stem}.csv"
+    store_src = _resolve_store_csv(stem)
+    _patch_kaggle_csv(store_src, parsed / f"store_file_{stem}.csv", "store")
+    logger.info("Kaggle store CSV for %s → store_file_%s.csv", chain_id, stem)
+
+    for prefix, kind in (("price_full_file_", "price"), ("promo_full_file_", "promo")):
+        src = latest_root / f"{prefix}{stem}.csv"
         if not src.exists():
             logger.warning(
                 "Kaggle %s CSV for %s missing at %s — skipping (chain may "

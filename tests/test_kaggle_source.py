@@ -1,4 +1,4 @@
-"""Unit tests for the Kaggle CSV RLE-fix.
+"""Unit tests for the Kaggle CSV RLE-fix and walkback.
 
 Network-dependent paths (download, populate_parsed_dir end-to-end) are
 exercised in the manual smoke test under scripts/, not here.
@@ -8,7 +8,8 @@ import csv
 
 import pytest
 
-from app.scraper.kaggle_source import _patch_kaggle_csv
+from app.scraper import kaggle_source
+from app.scraper.kaggle_source import _patch_kaggle_csv, _resolve_store_csv
 
 
 def _read_rows(path):
@@ -80,3 +81,79 @@ def test_genuine_empties_in_non_metadata_columns_preserved(tmp_path):
 
     rows = _read_rows(dst)
     assert [r["manufacturername"] for r in rows] == ["Tnuva", "", "Osem"]
+
+
+def test_resolve_store_csv_uses_latest_when_non_empty(tmp_path, monkeypatch):
+    """When the latest version's store file has rows, no walkback."""
+    latest = tmp_path / "100"
+    latest.mkdir()
+    f = latest / "store_file_x.csv"
+    f.write_text("storeid,storename\n1,a\n2,b\n")
+
+    monkeypatch.setattr(kaggle_source, "_dataset_path", str(latest))
+    # Bomb on any per-version download — proves we didn't walk back.
+    def boom(*a, **kw):
+        raise AssertionError("walkback should not be triggered")
+    monkeypatch.setattr("kagglehub.dataset_download", boom)
+
+    assert _resolve_store_csv("x") == f
+
+
+def test_resolve_store_csv_walks_back_when_latest_empty(tmp_path, monkeypatch):
+    """When the latest version's store file is header-only, walk back to
+    the most recent version that has data rows."""
+    latest = tmp_path / "100"
+    latest.mkdir()
+    (latest / "store_file_x.csv").write_text("storeid,storename\n")  # header only
+
+    older_versions = {
+        99: "header-only",
+        98: "header-only",
+        97: "data",
+        96: "data",
+    }
+    fetched = []
+
+    def fake_download(handle, path=None, **kw):
+        # handle looks like "<dataset>/versions/<N>"
+        version = int(handle.split("/")[-1])
+        fetched.append(version)
+        d = tmp_path / str(version)
+        d.mkdir(exist_ok=True)
+        out = d / path
+        if older_versions.get(version) == "data":
+            out.write_text("storeid,storename\n1,a\n")
+        else:
+            out.write_text("storeid,storename\n")
+        return str(out)
+
+    monkeypatch.setattr(kaggle_source, "_dataset_path", str(latest))
+    monkeypatch.setattr("kagglehub.dataset_download", fake_download)
+
+    result = _resolve_store_csv("x")
+    assert result == tmp_path / "97" / "store_file_x.csv"
+    assert fetched == [99, 98, 97]  # stopped at the first non-empty
+
+
+def test_resolve_store_csv_raises_when_walkback_exhausted(tmp_path, monkeypatch):
+    """All versions empty within the walkback window → loud failure rather
+    than silently returning a header-only file (would cause prune to skip
+    the chain on the loader side, but we want the operator to know)."""
+    latest = tmp_path / "5"
+    latest.mkdir()
+    (latest / "store_file_x.csv").write_text("storeid,storename\n")
+
+    def fake_download(handle, path=None, **kw):
+        version = int(handle.split("/")[-1])
+        d = tmp_path / str(version)
+        d.mkdir(exist_ok=True)
+        out = d / path
+        out.write_text("storeid,storename\n")  # always empty
+        return str(out)
+
+    monkeypatch.setattr(kaggle_source, "_dataset_path", str(latest))
+    monkeypatch.setattr("kagglehub.dataset_download", fake_download)
+    monkeypatch.setattr(kaggle_source, "_MAX_STORE_WALKBACK", 3)
+
+    with pytest.raises(RuntimeError, match="No non-empty store_file"):
+        _resolve_store_csv("x")

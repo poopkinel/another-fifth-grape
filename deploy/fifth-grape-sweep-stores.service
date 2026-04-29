@@ -1,0 +1,10 @@
+[Unit]
+Description=Fifth Grape — hard-delete stores soft-deleted past the recovery window
+After=network.target
+
+[Service]
+Type=oneshot
+User=fifth-grape
+WorkingDirectory=/home/fifth-grape/backend
+EnvironmentFile=/home/fifth-grape/backend/.env
+ExecStart=/home/fifth-grape/backend/.venv/bin/python scripts/sweep_pruned_stores.py --commit
